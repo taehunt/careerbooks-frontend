@@ -15,7 +15,7 @@ function App() {
 	return (
 		<div className="min-h-screen bg-gray-100 text-gray-800 font-sans">
 			<Navbar />
-			<main className="max-w-3xl mx-auto px-4 py-10">
+			<main className="mx-auto px-4 py-10">
 			<Routes>
 				<Route path="/" element={<Home />} />
 				<Route path="/books" element={<BookList />} />

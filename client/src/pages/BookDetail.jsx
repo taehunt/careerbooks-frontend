@@ -6,13 +6,16 @@ function BookDetail() {
   const { slug } = useParams();
   const [book, setBook] = useState(null);
   const [hasAccess, setHasAccess] = useState(false);
+  const [notFound, setNotFound] = useState(false); // ❗존재하지 않는 slug 처리
 
   // ✅ 책 정보 불러오기
   useEffect(() => {
+    setNotFound(false);
     axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/books/${slug}`)
       .then(res => setBook(res.data))
       .catch(err => {
         console.error('책 정보 불러오기 실패', err);
+        setNotFound(true); // ❗책이 없는 경우 처리
       });
   }, [slug]);
 
@@ -73,10 +76,19 @@ function BookDetail() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      {book ? (
+      {notFound ? (
+        <p className="text-center mt-10 text-red-500 font-semibold">
+          존재하지 않는 책입니다.
+        </p>
+      ) : book ? (
         <>
-          <h2 className="text-2xl font-bold mb-4">{book.title}</h2>
-          <p className="text-gray-700 mb-6">{book.description}</p>
+			<h2 className="text-2xl font-bold mb-2">
+				{book.titleIndex}. {book.title}
+			</h2>
+			<p className="text-gray-600 mb-2">{book.description}</p>
+			<p className="text-lg font-semibold text-blue-600 mb-6">
+				{book.price.toLocaleString()}원
+			</p>
 
           {/* ✅ 미리보기 이미지 최대 5장 */}
           <div className="grid gap-4 mb-6">
