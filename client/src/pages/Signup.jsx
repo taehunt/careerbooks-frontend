@@ -6,14 +6,49 @@ function Signup() {
   const [form, setForm] = useState({ userId: '', password: '', nickname: '' });
   const navigate = useNavigate();
 
+  const validate = () => {
+    const { userId, password, nickname } = form;
+
+    if (!nickname || !userId || !password) {
+      alert('모든 항목을 입력해주세요.');
+      return false;
+    }
+
+    // 닉네임: 한글 2~8자 또는 영문 4~8자, 자음/모음 단독 불가, 혼용 불가
+    const koreanRegex = /^[가-힣]{2,8}$/;
+    const englishRegex = /^[a-zA-Z]{4,8}$/;
+    if (!koreanRegex.test(nickname) && !englishRegex.test(nickname)) {
+      alert('닉네임은 한글(2~8자) 또는 영문(4~8자)만 가능하며,\n자음/모음 단독, 숫자/특수문자 또는 혼용은 불가합니다.');
+      return false;
+    }
+
+    // 아이디: 영어 + 숫자만, 최대 20자
+    const userIdRegex = /^[a-zA-Z0-9]{4,20}$/;
+    if (!userIdRegex.test(userId)) {
+      alert('아이디는 영어와 숫자만 입력 가능하며, 4~20자까지 입력 가능합니다.');
+      return false;
+    }
+
+    // 비밀번호: 영어 + 숫자 + 특수문자 허용, 최대 20자
+    const passwordRegex = /^[a-zA-Z0-9!@#$%^&*()_+{}[\]:;<>,.?~\\/-]{6,20}$/;
+    if (!passwordRegex.test(password)) {
+      alert('비밀번호는 영어, 숫자, 특수문자 조합만 가능하며, 6~20자까지 입력 가능합니다.');
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validate()) return;
+
     try {
       await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/signup`, form);
-      alert('회원가입 성공!');
+      alert('회원가입 성공 :)');
       navigate('/login');
     } catch (err) {
-      alert(err.response?.data?.message || '에러 발생');
+      alert(err.response?.data?.message || '에러가 발생했습니다.');
     }
   };
 
@@ -23,23 +58,23 @@ function Signup() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"
-          placeholder="닉네임"
+          placeholder="닉네임 (한글 2~8자 / 영문 4~8자)"
           className="w-full border p-2"
           onChange={(e) => setForm({ ...form, nickname: e.target.value })}
         />
         <input
           type="text"
-          placeholder="아이디"
+          placeholder="아이디 (영문+숫자, 최대 20자)"
           className="w-full border p-2"
           onChange={(e) => setForm({ ...form, userId: e.target.value })}
         />
         <input
           type="password"
-          placeholder="비밀번호"
+          placeholder="비밀번호 (특수문자 포함, 최대 20자)"
           className="w-full border p-2"
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
-        <button type="submit" className="w-full bg-blue-600 text-white py-2">
+        <button type="submit" className="w-full bg-blue-600 text-white py-2 hover:bg-blue-700 transition">
           가입하기
         </button>
       </form>

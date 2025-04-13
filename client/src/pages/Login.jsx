@@ -1,37 +1,44 @@
-import { useState, useContext } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import { useState, useContext } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 function Login() {
-  const [form, setForm] = useState({ userId: '', password: '' });
+  const [form, setForm] = useState({ userId: "", password: "" });
   const navigate = useNavigate();
   const { setUser } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-		const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, form);
-		// ✅ 서버 응답에서 토큰 + 유저 정보 저장
-		localStorage.setItem('token', res.data.token);
-		localStorage.setItem('user', JSON.stringify(res.data.user));
-		setUser(res.data.user);
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`,
+        form
+      );
+      // ✅ 서버 응답에서 토큰 + 유저 정보 저장
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      setUser(res.data.user);
 
-		alert('로그인 성공!');
-		navigate('/');
-		} catch (err) {
-		alert(err.response?.data?.message || '로그인 실패');
-		console.error(err);
-		}
-	};
+      alert("로그인 성공 :)");
+      navigate("/");
+    } catch (err) {
+      alert(err.response?.data?.message || "로그인 실패 :(");
+      console.error(err);
+    }
+  };
 
   return (
     <div className="flex justify-center items-center min-h-[70vh] px-4">
       <div className="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md border border-gray-200">
-        <h2 className="text-3xl font-extrabold text-center mb-6 text-gray-800 tracking-tight">로그인</h2>
+        <h2 className="text-3xl font-extrabold text-center mb-6 text-gray-800 tracking-tight">
+          로그인
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">아이디</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              아이디
+            </label>
             <input
               type="text"
               placeholder="아이디를 입력하세요"
@@ -40,7 +47,9 @@ function Login() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">비밀번호</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              비밀번호
+            </label>
             <input
               type="password"
               placeholder="••••••••"
