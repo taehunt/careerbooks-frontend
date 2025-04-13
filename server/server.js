@@ -4,6 +4,8 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import fileUpload from 'express-fileupload';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 import authRoutes from './routes/authRoutes.js';
 import bookRoutes from './routes/bookRoutes.js';
@@ -15,16 +17,19 @@ import Book from './models/Book.js';
 dotenv.config();
 const app = express();
 
-// ✅ CORS 설정
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// ✅ CORS 설정 (배포 도메인 허용)
 app.use(cors({
-  origin: 'http://careerbooks.shop',
+  origin: ['http://careerbooks.shop', 'https://careerbooks.shop'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
 
 app.use(express.json());
 app.use(fileUpload());
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ✅ 라우터 등록
 app.use('/api/auth', authRoutes);
@@ -93,8 +98,9 @@ mongoose.connect(process.env.MONGO_URI)
     console.log("✅ 전자책 6개 초기화 완료");
 
     // 🚀 서버 시작
-    app.listen(5000, () => {
-      console.log('✅ 서버 시작됨: http://localhost:5000');
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+      console.log(`✅ 서버 시작됨: http://localhost:${PORT}`);
     });
   })
   .catch((err) => console.error('❌ MongoDB 연결 실패:', err));

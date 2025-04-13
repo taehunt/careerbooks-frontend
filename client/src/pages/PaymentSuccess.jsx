@@ -8,7 +8,7 @@ function PaymentSuccess() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.post(`http://localhost:5000/api/books/${slug}/purchase`, {}, {
+    axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/books/${slug}/purchase`, {}, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }

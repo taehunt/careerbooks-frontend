@@ -5,7 +5,7 @@ function MyBooks() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    fetch("http://localhost:5000/api/books/my-books", {
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/books/my-books`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -31,7 +31,7 @@ function MyBooks() {
   const handleDownload = async (slug, fileName) => {
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch(`http://localhost:5000/api/downloads/${slug}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/downloads/${slug}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

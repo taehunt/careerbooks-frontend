@@ -11,20 +11,19 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', form);
+		const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, form);
+		// ✅ 서버 응답에서 토큰 + 유저 정보 저장
+		localStorage.setItem('token', res.data.token);
+		localStorage.setItem('user', JSON.stringify(res.data.user));
+		setUser(res.data.user);
 
-      // ✅ 서버 응답에서 토큰 + 유저 정보 저장
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify(res.data.user));
-      setUser(res.data.user);
-
-      alert('로그인 성공!');
-      navigate('/');
-    } catch (err) {
-      alert(err.response?.data?.message || '로그인 실패');
-      console.error(err);
-    }
-  };
+		alert('로그인 성공!');
+		navigate('/');
+		} catch (err) {
+		alert(err.response?.data?.message || '로그인 실패');
+		console.error(err);
+		}
+	};
 
   return (
     <div className="flex justify-center items-center min-h-[70vh] px-4">

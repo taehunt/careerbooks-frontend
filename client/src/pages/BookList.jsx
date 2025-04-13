@@ -6,7 +6,7 @@ function BookList() {
   const [books, setBooks] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/books')
+    axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/books`)
       .then((res) => setBooks(res.data))
       .catch((err) => console.error('도서 목록 불러오기 실패:', err));
   }, []);

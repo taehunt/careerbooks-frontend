@@ -9,7 +9,7 @@ function BookDetail() {
 
   // ✅ 책 정보 불러오기
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/books/${slug}`)
+    axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/books/${slug}`)
       .then(res => setBook(res.data))
       .catch(err => {
         console.error('책 정보 불러오기 실패', err);
@@ -19,7 +19,7 @@ function BookDetail() {
   // ✅ 접근 권한 확인
   useEffect(() => {
     const token = localStorage.getItem('token');
-    axios.get(`http://localhost:5000/api/books/${slug}/access`, {
+    axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/books/${slug}/access`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => setHasAccess(res.data.allowed))
@@ -33,7 +33,7 @@ function BookDetail() {
   const handleDownload = async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://localhost:5000/api/downloads/${slug}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/downloads/${slug}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -59,7 +59,7 @@ function BookDetail() {
     const token = localStorage.getItem('token');
     try {
       await axios.post(
-        `http://localhost:5000/api/books/${slug}/purchase`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/books/${slug}/purchase`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -83,7 +83,7 @@ function BookDetail() {
             {Array.from({ length: 5 }).map((_, idx) => (
               <img
                 key={idx}
-                src={`http://localhost:5000/uploads/${slug}_preview0${idx + 1}.png`}
+                src={`${import.meta.env.VITE_API_BASE_URL}/uploads/${slug}_preview0${idx + 1}.png`}
                 alt={`미리보기 ${idx + 1}`}
                 className="w-full border rounded shadow"
               />
