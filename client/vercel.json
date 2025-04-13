@@ -1,5 +1,6 @@
 {
 	"rewrites": [
-	  { "source": "/(.*)", "destination": "/" }
+	  { "source": "/api/(.*)", "destination": "https://careerbooks-server.vercel.app/api/$1" }
 	]
   }
+  
