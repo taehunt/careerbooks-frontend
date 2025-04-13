@@ -8,7 +8,7 @@ import { AuthContextProvider } from './context/AuthContext';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
-      <AuthContextProvider> {/* 전체 앱에 로그인 상태 주입 */}
+      <AuthContextProvider>
         <App />
       </AuthContextProvider>
     </BrowserRouter>

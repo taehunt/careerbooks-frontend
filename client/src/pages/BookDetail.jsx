@@ -83,7 +83,7 @@ function BookDetail() {
             {Array.from({ length: 5 }).map((_, idx) => (
               <img
                 key={idx}
-                src={`${import.meta.env.VITE_API_BASE_URL}/uploads/${slug}_preview0${idx + 1}.png`}
+                src={`${import.meta.env.VITE_UPLOADS_URL}/${slug}_preview0${idx + 1}.png`}
                 alt={`미리보기 ${idx + 1}`}
                 className="w-full border rounded shadow"
               />
