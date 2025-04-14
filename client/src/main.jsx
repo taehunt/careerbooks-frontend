@@ -5,6 +5,8 @@ import App from './App';
 import './index.css';
 import { AuthContextProvider } from './context/AuthContext';
 
+console.log("API 주소:", import.meta.env.VITE_API_BASE_URL);
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
@@ -14,4 +16,3 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </BrowserRouter>
   </React.StrictMode>
 );
-// force redeploy
