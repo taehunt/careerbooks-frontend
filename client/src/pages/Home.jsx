@@ -16,9 +16,7 @@ function Home() {
   return (
     <div className="bg-white">
       {/* ✅ 메인 슬라이드 영역 */}
-      <div className="relative h-[400px] bg-gradient-to-r from-blue-500 to-indigo-600 text-white flex flex-col justify-center items-center text-center px-4 transition-all duration-500 ease-in-out hover:brightness-110">
-	  	<MainSlider />
-      </div>
+      <MainSlider />
 
       {/* ✅ 전자책 카드 리스트 */}
       <div className="max-w-6xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
@@ -32,7 +30,9 @@ function Home() {
               className="border rounded-xl p-6 shadow hover:shadow-xl transition transform hover:-translate-y-1 bg-white"
             >
               <img
-                src={`${import.meta.env.VITE_UPLOADS_URL}/${book.slug}_preview01.png`}
+                src={`${import.meta.env.VITE_UPLOADS_URL}/${
+                  book.slug
+                }_preview01.png`}
                 alt={`${book.title} 미리보기`}
                 className="w-full h-48 object-cover rounded-md mb-4 transition duration-300 hover:brightness-105"
               />
@@ -104,10 +104,13 @@ function Home() {
         </h2>
         <div className="bg-white border rounded-xl shadow p-6 text-center hover:shadow-lg transition">
           <p className="text-lg text-gray-700 mb-4">
-            프론트엔드 개발 비전공자를 위한 입문서! 아래 버튼을 눌러 무료 전자책을 받아보세요.
+            프론트엔드 개발 비전공자를 위한 입문서! 아래 버튼을 눌러 무료
+            전자책을 받아보세요.
           </p>
           <a
-            href={`${import.meta.env.VITE_API_BASE_URL}/api/downloads/frontend00`}
+            href={`${
+              import.meta.env.VITE_API_BASE_URL
+            }/api/downloads/frontend00`}
             className="inline-block text-white bg-green-500 hover:bg-green-600 px-6 py-3 rounded-lg font-semibold transition transform hover:scale-105"
             download
           >
