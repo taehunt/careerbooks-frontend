@@ -4,19 +4,6 @@ import axios from "axios";
 const API = import.meta.env.VITE_API_BASE_URL;
 
 function Admin() {
-  const [newSlide, setNewSlide] = useState({
-    title: "",
-    subtitle: "",
-    image: "",
-    button1: "",
-    button1Url: "",
-    button2: "",
-    button2Url: "",
-    bgColor: "#ffffff",
-    textAlign: "left",
-    fontSize: "24px",
-  });
-
   const [form, setForm] = useState({
     title: "",
     slug: "",
@@ -38,7 +25,7 @@ function Admin() {
   const indexOfFirstBook = indexOfLastBook - booksPerPage;
   const currentBooks = books.slice(indexOfFirstBook, indexOfLastBook);
 
-  // ✅ 전자책 목록 불러오기
+  // 📘 전자책 목록 불러오기
   useEffect(() => {
     axios
       .get(`${API}/api/books`)
@@ -51,7 +38,7 @@ function Admin() {
       });
   }, []);
 
-  // ✅ 전자책 등록
+  // 📘 전자책 업로드
   const uploadBook = async () => {
     if (!form.file) {
       alert("파일을 선택해주세요.");
@@ -84,10 +71,14 @@ function Admin() {
     }
   };
 
-  // ✅ 회원 목록 불러오기
+  // 👥 회원 목록 불러오기
   useEffect(() => {
     axios
-      .get(`${API}/api/admin/users`, { withCredentials: true })
+      .get(`${API}/api/admin/users`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
       .then((res) => {
         if (Array.isArray(res.data)) setUsers(res.data);
         else if (res.data?.users) setUsers(res.data.users);
@@ -127,10 +118,7 @@ function Admin() {
                       type="number"
                       value={editForm.titleIndex}
                       onChange={(e) =>
-                        setEditForm({
-                          ...editForm,
-                          titleIndex: e.target.value,
-                        })
+                        setEditForm({ ...editForm, titleIndex: e.target.value })
                       }
                       className="border px-2 py-1 w-20 text-center"
                     />
@@ -193,10 +181,7 @@ function Admin() {
                       type="number"
                       value={editForm.originalPrice}
                       onChange={(e) =>
-                        setEditForm({
-                          ...editForm,
-                          originalPrice: e.target.value,
-                        })
+                        setEditForm({ ...editForm, originalPrice: e.target.value })
                       }
                       className="border px-2 py-1 w-20 text-right"
                     />
@@ -210,21 +195,12 @@ function Admin() {
                       <button
                         onClick={async () => {
                           try {
-                            await axios.put(
-                              `${API}/api/admin/books/${book._id}`,
-                              editForm
-                            );
+                            await axios.put(`${API}/api/admin/books/${book._id}`, editForm);
                             const res = await axios.get(`${API}/api/books`);
-                            setBooks(
-                              res.data.sort(
-                                (a, b) => a.titleIndex - b.titleIndex
-                              )
-                            );
+                            setBooks(res.data.sort((a, b) => a.titleIndex - b.titleIndex));
                             setEditRowId(null);
                           } catch (err) {
-                            alert(
-                              err.response?.data?.message || "수정 실패"
-                            );
+                            alert(err.response?.data?.message || "수정 실패");
                           }
                         }}
                         className="text-green-600 hover:underline text-sm"
@@ -261,15 +237,9 @@ function Admin() {
                       <button
                         onClick={async () => {
                           if (window.confirm("정말 삭제하시겠습니까?")) {
-                            await axios.delete(
-                              `${API}/api/admin/books/${book._id}`
-                            );
+                            await axios.delete(`${API}/api/admin/books/${book._id}`);
                             const res = await axios.get(`${API}/api/books`);
-                            setBooks(
-                              res.data.sort(
-                                (a, b) => a.titleIndex - b.titleIndex
-                              )
-                            );
+                            setBooks(res.data.sort((a, b) => a.titleIndex - b.titleIndex));
                           }
                         }}
                         className="text-red-600 hover:underline text-sm"
@@ -289,54 +259,16 @@ function Admin() {
       <section>
         <h2 className="text-xl font-semibold mb-2">📚 전자책 등록</h2>
         <div className="space-y-2">
-          <input
-            type="number"
-            placeholder="전자책 인덱스 (정렬용 숫자)"
-            value={form.titleIndex}
-            onChange={(e) =>
-              setForm({ ...form, titleIndex: e.target.value })
-            }
-            className="border p-2 w-full"
-          />
-          <input
-            type="text"
-            placeholder="제목"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-            className="border p-2 w-full"
-          />
-          <input
-            type="text"
-            placeholder="전자책 설명"
-            value={form.description}
-            onChange={(e) =>
-              setForm({ ...form, description: e.target.value })
-            }
-            className="border p-2 w-full"
-          />
-          <input
-            type="number"
-            placeholder="정가 (원)"
-            value={form.originalPrice}
-            onChange={(e) =>
-              setForm({ ...form, originalPrice: e.target.value })
-            }
-            className="border p-2 w-full"
-          />
-          <input
-            type="number"
-            placeholder="판매가 (원)"
-            value={form.price}
-            onChange={(e) => setForm({ ...form, price: e.target.value })}
-            className="border p-2 w-full"
-          />
-          <input
-            type="text"
-            placeholder="슬러그 (예: frontend01)"
-            value={form.slug}
-            onChange={(e) => setForm({ ...form, slug: e.target.value })}
-            className="border p-2 w-full"
-          />
+          {["titleIndex", "title", "description", "originalPrice", "price", "slug"].map((key) => (
+            <input
+              key={key}
+              type={key.includes("Price") || key === "titleIndex" ? "number" : "text"}
+              placeholder={key}
+              value={form[key]}
+              onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+              className="border p-2 w-full"
+            />
+          ))}
           <select
             value={form.category}
             onChange={(e) => setForm({ ...form, category: e.target.value })}
@@ -364,7 +296,7 @@ function Admin() {
       {/* 👥 회원 목록 */}
       <section>
         <h2 className="text-xl font-semibold mb-2">👥 회원 목록</h2>
-        <table className="w-full border">
+        <table className="w-full border text-sm">
           <thead className="bg-gray-100">
             <tr>
               <th className="p-2 border">ID</th>
