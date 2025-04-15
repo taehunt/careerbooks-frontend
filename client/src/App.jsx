@@ -19,7 +19,6 @@ import {
   import Navbar from "./components/Navbar";
   import RequireAuth from "./components/RequireAuth";
   import RedirectIfAuth from "./components/RedirectIfAuth";
-  import RequirePurchase from "./components/RequirePurchase";
   import PaymentSuccess from "./pages/PaymentSuccess";
   
   // 관리자 페이지 (관리자만 접근)
@@ -43,16 +42,9 @@ import {
 		  <Routes>
 			<Route path="/" element={<Home />} />
 			<Route path="/books" element={<BookList />} />
-			
-			{/* ✅ 책 상세는 구매자만 접근 가능 */}
-			<Route
-			  path="/books/:slug"
-			  element={
-				<RequirePurchase>
-				  <BookDetail />
-				</RequirePurchase>
-			  }
-			/>
+  
+			{/* ✅ 모든 유저 접근 가능, 다운로드만 제한 */}
+			<Route path="/books/:slug" element={<BookDetail />} />
   
 			<Route
 			  path="/mybooks"
@@ -79,7 +71,7 @@ import {
 				</RedirectIfAuth>
 			  }
 			/>
-			
+  
 			<Route path="/payment/success" element={<PaymentSuccess />} />
   
 			{/* ✅ 관리자 페이지 보호 */}
