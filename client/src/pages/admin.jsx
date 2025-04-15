@@ -38,6 +38,7 @@ function Admin() {
   const indexOfFirstBook = indexOfLastBook - booksPerPage;
   const currentBooks = books.slice(indexOfFirstBook, indexOfLastBook);
 
+  // ✅ 전자책 목록 불러오기
   useEffect(() => {
     axios
       .get(`${API}/api/books`)
@@ -50,6 +51,7 @@ function Admin() {
       });
   }, []);
 
+  // ✅ 전자책 등록
   const uploadBook = async () => {
     if (!form.file) {
       alert("파일을 선택해주세요.");
@@ -57,20 +59,13 @@ function Admin() {
     }
 
     const formData = new FormData();
-    formData.append("title", form.title);
-    formData.append("slug", form.slug);
-    formData.append("category", form.category);
-    formData.append("file", form.file);
-    formData.append("description", form.description);
-    formData.append("originalPrice", form.originalPrice);
-    formData.append("price", form.price);
-    formData.append("titleIndex", form.titleIndex);
+    Object.entries(form).forEach(([key, value]) =>
+      formData.append(key, value)
+    );
 
     try {
       await axios.post(`${API}/api/admin/books`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
       });
       alert("전자책 업로드 완료!");
       setForm({
@@ -85,26 +80,18 @@ function Admin() {
       });
     } catch (err) {
       console.error("업로드 실패", err);
-      if (err.response?.data?.message) {
-        alert(err.response.data.message);
-      } else {
-        alert("업로드 중 오류가 발생했습니다.");
-      }
+      alert(err.response?.data?.message || "업로드 중 오류 발생");
     }
   };
 
+  // ✅ 회원 목록 불러오기
   useEffect(() => {
     axios
       .get(`${API}/api/admin/users`, { withCredentials: true })
       .then((res) => {
-        if (Array.isArray(res.data)) {
-          setUsers(res.data);
-        } else if (res.data && Array.isArray(res.data.users)) {
-          setUsers(res.data.users);
-        } else {
-          console.warn("회원 목록이 배열이 아님:", res.data);
-          setUsers([]);
-        }
+        if (Array.isArray(res.data)) setUsers(res.data);
+        else if (res.data?.users) setUsers(res.data.users);
+        else setUsers([]);
       })
       .catch((err) => {
         console.error("회원 목록 불러오기 실패", err);
@@ -116,7 +103,7 @@ function Admin() {
     <div className="p-6 max-w-5xl mx-auto space-y-12">
       <h1 className="text-3xl font-bold">관리자 페이지</h1>
 
-      {/* 전자책 목록 출력 */}
+      {/* 📘 전자책 목록 출력 */}
       <section>
         <h2 className="text-xl font-semibold mb-2">📘 등록된 전자책 목록</h2>
         <table className="w-full border text-sm table-fixed">
@@ -140,7 +127,10 @@ function Admin() {
                       type="number"
                       value={editForm.titleIndex}
                       onChange={(e) =>
-                        setEditForm({ ...editForm, titleIndex: e.target.value })
+                        setEditForm({
+                          ...editForm,
+                          titleIndex: e.target.value,
+                        })
                       }
                       className="border px-2 py-1 w-20 text-center"
                     />
@@ -203,7 +193,10 @@ function Admin() {
                       type="number"
                       value={editForm.originalPrice}
                       onChange={(e) =>
-                        setEditForm({ ...editForm, originalPrice: e.target.value })
+                        setEditForm({
+                          ...editForm,
+                          originalPrice: e.target.value,
+                        })
                       }
                       className="border px-2 py-1 w-20 text-right"
                     />
@@ -217,12 +210,21 @@ function Admin() {
                       <button
                         onClick={async () => {
                           try {
-                            await axios.put(`${API}/api/admin/books/${book._id}`, editForm);
+                            await axios.put(
+                              `${API}/api/admin/books/${book._id}`,
+                              editForm
+                            );
                             const res = await axios.get(`${API}/api/books`);
-                            setBooks(res.data.sort((a, b) => a.titleIndex - b.titleIndex));
+                            setBooks(
+                              res.data.sort(
+                                (a, b) => a.titleIndex - b.titleIndex
+                              )
+                            );
                             setEditRowId(null);
                           } catch (err) {
-                            alert(err.response?.data?.message || "수정 실패");
+                            alert(
+                              err.response?.data?.message || "수정 실패"
+                            );
                           }
                         }}
                         className="text-green-600 hover:underline text-sm"
@@ -259,9 +261,15 @@ function Admin() {
                       <button
                         onClick={async () => {
                           if (window.confirm("정말 삭제하시겠습니까?")) {
-                            await axios.delete(`${API}/api/admin/books/${book._id}`);
+                            await axios.delete(
+                              `${API}/api/admin/books/${book._id}`
+                            );
                             const res = await axios.get(`${API}/api/books`);
-                            setBooks(res.data.sort((a, b) => a.titleIndex - b.titleIndex));
+                            setBooks(
+                              res.data.sort(
+                                (a, b) => a.titleIndex - b.titleIndex
+                              )
+                            );
                           }
                         }}
                         className="text-red-600 hover:underline text-sm"
@@ -277,7 +285,7 @@ function Admin() {
         </table>
       </section>
 
-      {/* 전자책 등록 */}
+      {/* 📚 전자책 등록 */}
       <section>
         <h2 className="text-xl font-semibold mb-2">📚 전자책 등록</h2>
         <div className="space-y-2">
@@ -285,7 +293,9 @@ function Admin() {
             type="number"
             placeholder="전자책 인덱스 (정렬용 숫자)"
             value={form.titleIndex}
-            onChange={(e) => setForm({ ...form, titleIndex: e.target.value })}
+            onChange={(e) =>
+              setForm({ ...form, titleIndex: e.target.value })
+            }
             className="border p-2 w-full"
           />
           <input
@@ -299,14 +309,18 @@ function Admin() {
             type="text"
             placeholder="전자책 설명"
             value={form.description}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            onChange={(e) =>
+              setForm({ ...form, description: e.target.value })
+            }
             className="border p-2 w-full"
           />
           <input
             type="number"
             placeholder="정가 (원)"
             value={form.originalPrice}
-            onChange={(e) => setForm({ ...form, originalPrice: e.target.value })}
+            onChange={(e) =>
+              setForm({ ...form, originalPrice: e.target.value })
+            }
             className="border p-2 w-full"
           />
           <input
@@ -347,7 +361,7 @@ function Admin() {
         </div>
       </section>
 
-      {/* 회원 목록 */}
+      {/* 👥 회원 목록 */}
       <section>
         <h2 className="text-xl font-semibold mb-2">👥 회원 목록</h2>
         <table className="w-full border">
