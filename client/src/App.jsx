@@ -23,7 +23,7 @@ import RequirePurchase from "./components/RequirePurchase";
 import PaymentSuccess from "./pages/PaymentSuccess";
 
 // 관리자 페이지 (관리자만 접근)
-import Admin from "./pages/Admin";
+import Admin from "./pages/admin";
 
 function App() {
   const { user } = useContext(AuthContext);
