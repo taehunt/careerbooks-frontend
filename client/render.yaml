@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: careerbooks-frontend
+    env: node
+    repo: https://github.com/taehunt/careerbooks-frontend
+    branch: main
+    buildCommand: npm run build
+    startCommand: npm run preview
+    installCommand: npm install --legacy-peer-deps
+    envVars:
+      - key: NODE_VERSION
+        value: 18
