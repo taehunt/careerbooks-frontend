@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
+const API = import.meta.env.VITE_API_BASE_URL;
+
 function Login() {
   const [form, setForm] = useState({ userId: "", password: "" });
   const navigate = useNavigate();
@@ -11,11 +13,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`,
-        form
-      );
-      // ✅ 서버 응답에서 토큰 + 유저 정보 저장
+      const res = await axios.post(`${API}/api/auth/login`, form);
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
       setUser(res.data.user);

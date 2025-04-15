@@ -3,12 +3,15 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import MainSlider from "../components/MainSlider";
 
+const API = import.meta.env.VITE_API_BASE_URL;
+const UPLOADS = import.meta.env.VITE_UPLOADS_URL;
+
 function Home() {
   const [books, setBooks] = useState([]);
 
   useEffect(() => {
     axios
-      .get(`${import.meta.env.VITE_API_BASE_URL}/api/books`)
+      .get(`${API}/api/books`)
       .then((res) => setBooks(res.data))
       .catch((err) => console.error("도서 목록 불러오기 실패:", err));
   }, []);
@@ -30,9 +33,7 @@ function Home() {
               className="border rounded-xl p-6 shadow hover:shadow-xl transition transform hover:-translate-y-1 bg-white"
             >
               <img
-                src={`${import.meta.env.VITE_UPLOADS_URL}/${
-                  book.slug
-                }_preview01.png`}
+                src={`${UPLOADS}/${book.slug}_preview01.png`}
                 alt={`${book.title} 미리보기`}
                 className="w-full h-48 object-cover rounded-md mb-4 transition duration-300 hover:brightness-105"
               />
@@ -52,8 +53,7 @@ function Home() {
                     <span className="ml-2 text-sm text-green-600">
                       (
                       {Math.round(
-                        ((book.originalPrice - book.price) /
-                          book.originalPrice) *
+                        ((book.originalPrice - book.price) / book.originalPrice) *
                           100
                       )}
                       % 할인)
@@ -108,9 +108,7 @@ function Home() {
             전자책을 받아보세요.
           </p>
           <a
-            href={`${
-              import.meta.env.VITE_API_BASE_URL
-            }/api/downloads/frontend00`}
+            href={`${API}/api/downloads/frontend00`}
             className="inline-block text-white bg-green-500 hover:bg-green-600 px-6 py-3 rounded-lg font-semibold transition transform hover:scale-105"
             download
           >

@@ -1,8 +1,9 @@
-// client/src/components/RequirePurchase.jsx
 import { useContext, useEffect, useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
+
+const API = import.meta.env.VITE_API_BASE_URL;
 
 function RequirePurchase({ children }) {
   const { user } = useContext(AuthContext);
@@ -19,7 +20,7 @@ function RequirePurchase({ children }) {
       }
 
       try {
-        const res = await axios.get(`http://localhost:5000/api/books/${slug}/access`, {
+        const res = await axios.get(`${API}/api/books/${slug}/access`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },

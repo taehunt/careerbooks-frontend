@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+const API = import.meta.env.VITE_API_BASE_URL;
+const UPLOADS = import.meta.env.VITE_UPLOADS_URL;
+
 function BookDetail() {
   const navigate = useNavigate();
   const { slug } = useParams();
@@ -13,7 +16,7 @@ function BookDetail() {
   useEffect(() => {
     setNotFound(false);
     axios
-      .get(`${import.meta.env.VITE_API_BASE_URL}/api/books/${slug}`)
+      .get(`${API}/api/books/${slug}`)
       .then((res) => setBook(res.data))
       .catch((err) => {
         console.error("책 정보 불러오기 실패", err);
@@ -28,7 +31,7 @@ function BookDetail() {
       return;
     }
     axios
-      .get(`${import.meta.env.VITE_API_BASE_URL}/api/books/${slug}/access`, {
+      .get(`${API}/api/books/${slug}/access`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setHasAccess(res.data.allowed))
@@ -45,12 +48,9 @@ function BookDetail() {
       return;
     }
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/downloads/${slug}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await fetch(`${API}/api/downloads/${slug}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (!response.ok) throw new Error("다운로드 실패");
 
@@ -78,9 +78,11 @@ function BookDetail() {
     }
     try {
       await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/books/${slug}/purchase`,
+        `${API}/api/books/${slug}/purchase`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
       alert("구매 완료");
       setHasAccess(true);
@@ -106,21 +108,15 @@ function BookDetail() {
       ) : book ? (
         <>
           <div className="text-sm text-blue-600 mb-2 space-x-1">
-            <Link to="/" className="hover:underline">
-              홈
-            </Link>
+            <Link to="/" className="hover:underline">홈</Link>
             <span>&gt;</span>
-            <Link to="/books" className="hover:underline">
-              전자책 목록
-            </Link>
+            <Link to="/books" className="hover:underline">전자책 목록</Link>
             <span>&gt;</span>
-            <Link
-              to={`/books?category=${book.category}`}
-              className="hover:underline"
-            >
+            <Link to={`/books?category=${book.category}`} className="hover:underline">
               {categoryLabels[book.category] || book.category}
             </Link>
           </div>
+
           <div className="mt-8 mb-6">
             <h2 className="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">
               📘 {book.titleIndex}. {book.title}
@@ -138,8 +134,7 @@ function BookDetail() {
                   <span className="ml-2 text-sm text-green-600">
                     (
                     {Math.round(
-                      ((book.originalPrice - book.price) / book.originalPrice) *
-                        100
+                      ((book.originalPrice - book.price) / book.originalPrice) * 100
                     )}
                     % 할인)
                   </span>
@@ -159,10 +154,7 @@ function BookDetail() {
               <ul className="list-disc list-inside my-4">
                 <li>비전공자지만 웹 개발을 시작하고 싶은 분</li>
                 <li>실전 프로젝트로 포트폴리오를 만들고 싶은 분</li>
-                <li>
-                  HTML, CSS, React, Express, MongoDB까지 실제 서비스 흐름을
-                  익히고 싶은 분
-                </li>
+                <li>HTML, CSS, React, Express, MongoDB까지 실제 서비스 흐름을 익히고 싶은 분</li>
                 <li>이직, 부업, 창업 등 실용적인 웹 제작 경험이 필요한 분</li>
               </ul>
               <p>
@@ -174,9 +166,7 @@ function BookDetail() {
                 지금 시작하지 않으면, 내일도 똑같은 자리에 머물러 있을지도
                 모릅니다.
               </p>
-              <p className="mt-4 font-bold text-blue-600">
-                이 기회를 잡아보세요!
-              </p>
+              <p className="mt-4 font-bold text-blue-600">이 기회를 잡아보세요!</p>
             </div>
           </div>
 
@@ -191,7 +181,6 @@ function BookDetail() {
               </button>
             </h3>
 
-            {/* ✅ Collapse 영역 */}
             <div
               className={`grid gap-4 transition-all duration-500 overflow-hidden ${
                 showPreview ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
@@ -200,9 +189,7 @@ function BookDetail() {
               {Array.from({ length: 5 }).map((_, idx) => (
                 <img
                   key={idx}
-                  src={`${import.meta.env.VITE_UPLOADS_URL}/${slug}_preview0${
-                    idx + 1
-                  }.png`}
+                  src={`${UPLOADS}/${slug}_preview0${idx + 1}.png`}
                   alt={`미리보기 ${idx + 1}`}
                   className="w-full border rounded shadow hover:shadow-lg transition"
                 />

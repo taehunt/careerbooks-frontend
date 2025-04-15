@@ -5,6 +5,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 
+const API = import.meta.env.VITE_API_BASE_URL;
+
 function MainSlider() {
   const [slides, setSlides] = useState([]);
   const [index, setIndex] = useState(0);
@@ -13,14 +15,13 @@ function MainSlider() {
   const startX = useRef(null);
   const isDragging = useRef(false);
 
-  // ✅ 슬라이드 데이터 로딩
   useEffect(() => {
     axios
-      .get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/slides`)
+      .get(`${API}/api/admin/slides`)
       .then((res) => setSlides(res.data))
       .catch((err) => {
         console.error("슬라이드 불러오기 실패", err);
-        setSlides([]); // 실패 시 빈 배열
+        setSlides([]);
       });
   }, []);
 
@@ -83,7 +84,6 @@ function MainSlider() {
   };
 
   if (slides.length === 0) return null;
-
   const slide = slides[index];
 
   return (

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
 
+const API = import.meta.env.VITE_API_BASE_URL;
+
 function BookList() {
   const [books, setBooks] = useState([]);
   const location = useLocation();
@@ -22,15 +24,14 @@ function BookList() {
 
   useEffect(() => {
     const url = category
-      ? `${import.meta.env.VITE_API_BASE_URL}/api/books?category=${category}`
-      : `${import.meta.env.VITE_API_BASE_URL}/api/books`;
+      ? `${API}/api/books?category=${category}`
+      : `${API}/api/books`;
 
     axios
       .get(url)
       .then((res) => setBooks(res.data))
       .catch((err) => console.error("도서 목록 불러오기 실패:", err));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.search]);
+  }, [category]);
 
   return (
     <div className="space-y-8">
@@ -46,10 +47,7 @@ function BookList() {
         {category && (
           <>
             <span>&gt;</span>
-            <Link
-              to={`/books?category=${category}`}
-              className="hover:underline"
-            >
+            <Link to={`/books?category=${category}`} className="hover:underline">
               {categoryLabels[category] || category}
             </Link>
           </>
@@ -69,6 +67,7 @@ function BookList() {
               {book.titleIndex}. {book.title}
             </h2>
             <p className="text-gray-700 mt-2">{book.description}</p>
+
             {/* 가격 표시 영역 */}
             <p className="font-semibold text-blue-600 mb-6 text-lg">
               {book.originalPrice && book.originalPrice > book.price ? (
@@ -82,8 +81,7 @@ function BookList() {
                   <span className="ml-2 text-sm text-green-600">
                     (
                     {Math.round(
-                      ((book.originalPrice - book.price) /
-                        book.originalPrice) *
+                      ((book.originalPrice - book.price) / book.originalPrice) *
                         100
                     )}
                     % 할인)
@@ -93,6 +91,7 @@ function BookList() {
                 <>{book.price.toLocaleString()}원</>
               )}
             </p>
+
             <Link
               to={`/books/${book.slug}`}
               className="inline-block mt-4 text-sm text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition"

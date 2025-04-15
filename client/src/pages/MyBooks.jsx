@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 
+const API = import.meta.env.VITE_API_BASE_URL;
+
 function MyBooks() {
   const [books, setBooks] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/books/my-books`, {
+    fetch(`${API}/api/books/my-books`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -31,7 +33,7 @@ function MyBooks() {
   const handleDownload = async (slug, fileName) => {
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/downloads/${slug}`, {
+      const res = await fetch(`${API}/api/downloads/${slug}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

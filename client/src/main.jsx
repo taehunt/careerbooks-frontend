@@ -5,7 +5,10 @@ import App from './App';
 import './index.css';
 import { AuthContextProvider } from './context/AuthContext';
 
-console.log("API 주소:", import.meta.env.VITE_API_BASE_URL);
+// 개발 환경일 때만 콘솔 출력
+if (import.meta.env.DEV) {
+  console.log("API 주소:", import.meta.env.VITE_API_BASE_URL);
+}
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

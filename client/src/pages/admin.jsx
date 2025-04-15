@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+const API = import.meta.env.VITE_API_BASE_URL;
+
 function Admin() {
   const [newSlide, setNewSlide] = useState({
     title: "",
@@ -28,8 +30,8 @@ function Admin() {
 
   const [users, setUsers] = useState([]);
   const [books, setBooks] = useState([]);
-  const [editRowId, setEditRowId] = useState(null); // 수정 중인 행 ID
-  const [editForm, setEditForm] = useState({}); // 수정 입력값
+  const [editRowId, setEditRowId] = useState(null);
+  const [editForm, setEditForm] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const booksPerPage = 10;
   const indexOfLastBook = currentPage * booksPerPage;
@@ -38,7 +40,7 @@ function Admin() {
 
   useEffect(() => {
     axios
-      .get("/api/books")
+      .get(`${API}/api/books`)
       .then((res) => {
         const sorted = res.data.sort((a, b) => a.titleIndex - b.titleIndex);
         setBooks(sorted);
@@ -48,7 +50,6 @@ function Admin() {
       });
   }, []);
 
-  // ✅ 전자책 업로드
   const uploadBook = async () => {
     if (!form.file) {
       alert("파일을 선택해주세요.");
@@ -66,7 +67,7 @@ function Admin() {
     formData.append("titleIndex", form.titleIndex);
 
     try {
-      await axios.post("/api/admin/books", formData, {
+      await axios.post(`${API}/api/admin/books`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -92,32 +93,30 @@ function Admin() {
     }
   };
 
-  // ✅ 회원 목록 불러오기
-useEffect(() => {
-	axios
-	  .get("/api/admin/users", { withCredentials: true }) // ✅ 여기!
-	  .then((res) => {
-		console.log("회원 목록 응답:", res.data);
-		if (Array.isArray(res.data)) {
-		  setUsers(res.data);
-		} else if (res.data && Array.isArray(res.data.users)) {
-		  setUsers(res.data.users);
-		} else {
-		  console.warn("회원 목록이 배열이 아님:", res.data);
-		  setUsers([]);
-		}
-	  })
-	  .catch((err) => {
-		console.error("회원 목록 불러오기 실패", err);
-		setUsers([]);
-	  });
+  useEffect(() => {
+    axios
+      .get(`${API}/api/admin/users`, { withCredentials: true })
+      .then((res) => {
+        if (Array.isArray(res.data)) {
+          setUsers(res.data);
+        } else if (res.data && Array.isArray(res.data.users)) {
+          setUsers(res.data.users);
+        } else {
+          console.warn("회원 목록이 배열이 아님:", res.data);
+          setUsers([]);
+        }
+      })
+      .catch((err) => {
+        console.error("회원 목록 불러오기 실패", err);
+        setUsers([]);
+      });
   }, []);
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-12">
       <h1 className="text-3xl font-bold">관리자 페이지</h1>
 
-      {/* ✅ 전자책 목록 출력 */}
+      {/* 전자책 목록 출력 */}
       <section>
         <h2 className="text-xl font-semibold mb-2">📘 등록된 전자책 목록</h2>
         <table className="w-full border text-sm table-fixed">
@@ -135,7 +134,7 @@ useEffect(() => {
           <tbody>
             {currentBooks.map((book) => (
               <tr key={book._id}>
-                <td className="border p-2 w-[60px] text-center">
+                <td className="border p-2 text-center">
                   {editRowId === book._id ? (
                     <input
                       type="number"
@@ -163,12 +162,10 @@ useEffect(() => {
                     book.title
                   )}
                 </td>
-
-                <td className="border p-2 w-[90px] text-center hidden sm:table-cell">
+                <td className="border p-2 text-center hidden sm:table-cell">
                   {book.slug}
                 </td>
-
-                <td className="border p-2 w-[70px] text-center">
+                <td className="border p-2 text-center">
                   {editRowId === book._id ? (
                     <select
                       value={editForm.category}
@@ -186,8 +183,7 @@ useEffect(() => {
                     book.category
                   )}
                 </td>
-
-                <td className="border p-2 w-[80px] text-right">
+                <td className="border p-2 text-right">
                   {editRowId === book._id ? (
                     <input
                       type="number"
@@ -201,17 +197,13 @@ useEffect(() => {
                     `${book.price?.toLocaleString()}원`
                   )}
                 </td>
-
-                <td className="border p-2 w-[90px] text-right hidden sm:table-cell">
+                <td className="border p-2 text-right hidden sm:table-cell">
                   {editRowId === book._id ? (
                     <input
                       type="number"
                       value={editForm.originalPrice}
                       onChange={(e) =>
-                        setEditForm({
-                          ...editForm,
-                          originalPrice: e.target.value,
-                        })
+                        setEditForm({ ...editForm, originalPrice: e.target.value })
                       }
                       className="border px-2 py-1 w-20 text-right"
                     />
@@ -219,22 +211,15 @@ useEffect(() => {
                     `${book.originalPrice?.toLocaleString()}원`
                   )}
                 </td>
-                <td className="border p-2 w-[70px] text-center space-x-1">
+                <td className="border p-2 text-center space-x-1">
                   {editRowId === book._id ? (
                     <>
                       <button
                         onClick={async () => {
                           try {
-                            await axios.put(
-                              `/api/admin/books/${book._id}`,
-                              editForm
-                            );
-                            const res = await axios.get("/api/books");
-                            setBooks(
-                              res.data.sort(
-                                (a, b) => a.titleIndex - b.titleIndex
-                              )
-                            );
+                            await axios.put(`${API}/api/admin/books/${book._id}`, editForm);
+                            const res = await axios.get(`${API}/api/books`);
+                            setBooks(res.data.sort((a, b) => a.titleIndex - b.titleIndex));
                             setEditRowId(null);
                           } catch (err) {
                             alert(err.response?.data?.message || "수정 실패");
@@ -274,13 +259,9 @@ useEffect(() => {
                       <button
                         onClick={async () => {
                           if (window.confirm("정말 삭제하시겠습니까?")) {
-                            await axios.delete(`/api/admin/books/${book._id}`);
-                            const res = await axios.get("/api/books");
-                            setBooks(
-                              res.data.sort(
-                                (a, b) => a.titleIndex - b.titleIndex
-                              )
-                            );
+                            await axios.delete(`${API}/api/admin/books/${book._id}`);
+                            const res = await axios.get(`${API}/api/books`);
+                            setBooks(res.data.sort((a, b) => a.titleIndex - b.titleIndex));
                           }
                         }}
                         className="text-red-600 hover:underline text-sm"
@@ -292,56 +273,11 @@ useEffect(() => {
                 </td>
               </tr>
             ))}
-
-            {/* ✅ 부족한 줄만큼 빈 행 채우기 */}
-            {currentBooks.length < booksPerPage &&
-              Array.from({ length: booksPerPage - currentBooks.length }).map(
-                (_, j) => (
-                  <tr key={`empty-${j}`}>
-                    <td className="border p-2 text-center text-gray-300">
-                      {indexOfFirstBook + currentBooks.length + j + 1}
-                    </td>
-                    <td className="border p-2">&nbsp;</td>
-                    <td className="border p-2 hidden sm:table-cell">&nbsp;</td>
-                    <td className="border p-2">&nbsp;</td>
-                    <td className="border p-2">&nbsp;</td>
-                    <td className="border p-2 hidden sm:table-cell">&nbsp;</td>
-                    <td className="border p-2 text-center text-sm text-gray-300">
-                      빈 줄
-                    </td>
-                  </tr>
-                )
-              )}
           </tbody>
         </table>
-
-        {/* ✅ 페이지네이션 */}
-        {books.length > booksPerPage && (
-          <div className="mt-4 flex justify-center space-x-2">
-            {Array.from(
-              { length: Math.ceil(books.length / booksPerPage) },
-              (_, i) => (
-                <button
-                  key={i}
-                  onClick={() => {
-                    setCurrentPage(i + 1);
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }}
-                  className={`px-3 py-1 border rounded ${
-                    currentPage === i + 1
-                      ? "bg-blue-600 text-white"
-                      : "bg-white text-gray-800 hover:bg-gray-100"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              )
-            )}
-          </div>
-        )}
       </section>
 
-      {/* ✅ 전자책 등록 */}
+      {/* 전자책 등록 */}
       <section>
         <h2 className="text-xl font-semibold mb-2">📚 전자책 등록</h2>
         <div className="space-y-2">
@@ -366,17 +302,13 @@ useEffect(() => {
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             className="border p-2 w-full"
           />
-
           <input
             type="number"
             placeholder="정가 (원)"
             value={form.originalPrice}
-            onChange={(e) =>
-              setForm({ ...form, originalPrice: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, originalPrice: e.target.value })}
             className="border p-2 w-full"
           />
-
           <input
             type="number"
             placeholder="판매가 (원)"
@@ -415,7 +347,7 @@ useEffect(() => {
         </div>
       </section>
 
-      {/* ✅ 회원 목록 */}
+      {/* 회원 목록 */}
       <section>
         <h2 className="text-xl font-semibold mb-2">👥 회원 목록</h2>
         <table className="w-full border">
