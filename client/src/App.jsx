@@ -1,3 +1,4 @@
+// App.jsx
 import {
 	BrowserRouter as Router,
 	Routes,
@@ -14,6 +15,7 @@ import {
   import MyBooks from "./pages/MyBooks";
   import BookDetail from "./pages/BookDetail";
   import BookList from "./pages/BookList";
+  import BookCategories from "./pages/BookCategories"; // ✅ 추가
   
   // 기타 컴포넌트
   import Navbar from "./components/Navbar";
@@ -42,6 +44,7 @@ import {
 		  <Routes>
 			<Route path="/" element={<Home />} />
 			<Route path="/books" element={<BookList />} />
+			<Route path="/books/categories" element={<BookCategories />} />
   
 			{/* ✅ 모든 유저 접근 가능, 다운로드만 제한 */}
 			<Route path="/books/:slug" element={<BookDetail />} />

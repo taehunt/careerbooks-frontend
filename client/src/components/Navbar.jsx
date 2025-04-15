@@ -65,9 +65,12 @@ function Navbar() {
 
           {/* 전자책 Hover용 드롭다운 */}
           <div className="relative group">
-            <div className="hover:text-blue-500 navMenu block py-2 cursor-pointer">
+            <Link
+              to="/books/categories"
+              className="hover:text-blue-500 navMenu block py-2 cursor-pointer"
+            >
               전자책
-            </div>
+            </Link>
             <div className="absolute left-0 w-48 bg-white border rounded shadow-lg z-10 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-150">
               <Link
                 to="/books?category=planning"
@@ -154,46 +157,45 @@ function Navbar() {
               홈
             </Link>
 
-            <div>
-              <button
-                onClick={() => setEbookOpen(!ebookOpen)}
-                className="block w-full text-left py-2"
-              >
-                전자책
-              </button>
-              {ebookOpen && (
-                <div className="ml-4 space-y-2">
-                  <Link
-                    to="/books?category=planning"
-                    className="block"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    웹기획
-                  </Link>
-                  <Link
-                    to="/books?category=design"
-                    className="block"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    웹디자인
-                  </Link>
-                  <Link
-                    to="/books?category=frontend"
-                    className="block"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    프론트엔드 개발
-                  </Link>
-                  <Link
-                    to="/books?category=backend"
-                    className="block"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    백엔드 개발
-                  </Link>
-                </div>
-              )}
-            </div>
+            <Link
+              to="/books/categories"
+              className="block py-2"
+              onClick={() => setMenuOpen(false)}
+            >
+              전자책
+            </Link>
+            {ebookOpen && (
+              <div className="ml-4 space-y-2">
+                <Link
+                  to="/books?category=planning"
+                  className="block"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  웹기획
+                </Link>
+                <Link
+                  to="/books?category=design"
+                  className="block"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  웹디자인
+                </Link>
+                <Link
+                  to="/books?category=frontend"
+                  className="block"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  프론트엔드 개발
+                </Link>
+                <Link
+                  to="/books?category=backend"
+                  className="block"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  백엔드 개발
+                </Link>
+              </div>
+            )}
 
             {user ? (
               <>
