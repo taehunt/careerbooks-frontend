@@ -8,6 +8,14 @@ const UPLOADS = import.meta.env.VITE_UPLOADS_URL;
 
 function Home() {
   const [books, setBooks] = useState([]);
+  const [popularBooks, setPopularBooks] = useState([]);
+
+  useEffect(() => {
+    axios
+      .get(`${API}/api/books/popular`)
+      .then((res) => setPopularBooks(res.data))
+      .catch((err) => console.error("인기 도서 불러오기 실패:", err));
+  }, []);
 
   useEffect(() => {
     axios
@@ -21,13 +29,13 @@ function Home() {
       {/* ✅ 메인 슬라이드 영역 */}
       <MainSlider />
 
-      {/* ✅ 전자책 카드 리스트 */}
+      {/* 인기 전자책 섹션 */}
       <div className="max-w-6xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">
           🔥 지금 인기있는 전자책
         </h2>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {books.slice(12, 15).map((book, index) => (
+          {popularBooks.map((book, index) => (
             <div
               key={book.slug}
               className="border rounded-xl p-6 shadow hover:shadow-xl transition transform hover:-translate-y-1 bg-white"
@@ -53,7 +61,8 @@ function Home() {
                     <span className="ml-2 text-sm text-green-600">
                       (
                       {Math.round(
-                        ((book.originalPrice - book.price) / book.originalPrice) *
+                        ((book.originalPrice - book.price) /
+                          book.originalPrice) *
                           100
                       )}
                       % 할인)
