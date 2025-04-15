@@ -1,74 +1,76 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
+const CATEGORY_LABELS = {
+  planning: "웹기획",
+  design: "웹디자인",
+  frontend: "프론트엔드 개발",
+  backend: "백엔드 개발",
+};
+
 function BookCategories() {
-  const [books, setBooks] = useState([]);
-  const [expanded, setExpanded] = useState({});
+  const [booksByCategory, setBooksByCategory] = useState({});
+  const [openCategory, setOpenCategory] = useState(null);
 
   useEffect(() => {
-    axios
-      .get(`${API}/api/books`)
-      .then((res) => setBooks(res.data))
-      .catch((err) => console.error("전자책 목록 불러오기 실패", err));
+    const fetchBooks = async () => {
+      try {
+        const res = await axios.get(`${API}/api/books`);
+        const grouped = res.data.reduce((acc, book) => {
+          if (!acc[book.category]) acc[book.category] = [];
+          acc[book.category].push(book);
+          return acc;
+        }, {});
+        setBooksByCategory(grouped);
+      } catch (err) {
+        console.error("카테고리별 도서 불러오기 실패:", err);
+      }
+    };
+    fetchBooks();
   }, []);
 
-  const grouped = books.reduce((acc, book) => {
-    if (!acc[book.category]) acc[book.category] = [];
-    acc[book.category].push(book);
-    return acc;
-  }, {});
-
-  const toggleCategory = (category) => {
-    setExpanded((prev) => ({
-      ...prev,
-      [category]: !prev[category],
-    }));
-  };
-
-  const categoryNames = {
-    frontend: "프론트엔드 개발",
-    backend: "백엔드 개발",
-    planning: "웹기획",
-    design: "웹디자인",
-  };
-
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">📚 카테고리별 전자책</h1>
+    <div className="max-w-4xl mx-auto px-4 py-12">
+      <h1 className="text-3xl font-bold text-center mb-10">📂 전자책 카테고리</h1>
+      <div className="space-y-4">
+        {Object.entries(CATEGORY_LABELS).map(([key, label]) => {
+          const books = booksByCategory[key] || [];
+          if (books.length === 0) return null;
 
-      {Object.entries(grouped).map(([category, items]) => (
-        <div key={category} className="mb-6 border rounded bg-white shadow-sm">
-          <div
-            onClick={() => toggleCategory(category)}
-            className="px-4 py-3 bg-gray-100 cursor-pointer font-semibold text-lg flex justify-between items-center"
-          >
-            <span>{categoryNames[category] || category}</span>
-            <span>{expanded[category] ? "▲" : "▼"}</span>
-          </div>
+          const isOpen = openCategory === key;
 
-          {expanded[category] && (
-            <ul className="divide-y">
-              {items.map((book) => (
-                <li key={book._id} className="px-4 py-3 hover:bg-gray-50">
-                  <Link
-                    to={`/books/${book.slug}`}
-                    className="text-blue-600 hover:underline"
-                  >
-                    {book.titleIndex}. {book.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      ))}
-
-      {books.length === 0 && (
-        <p className="text-gray-500 text-center mt-10">등록된 전자책이 없습니다.</p>
-      )}
+          return (
+            <div key={key} className="border rounded-lg shadow bg-white">
+              <button
+                onClick={() => setOpenCategory(isOpen ? null : key)}
+                className="w-full flex justify-between items-center p-4 text-left font-semibold text-lg text-gray-800 hover:bg-gray-50"
+              >
+                {label}
+                <span className="text-sm text-gray-500">
+                  {isOpen ? "▲" : "▼"}
+                </span>
+              </button>
+              {isOpen && (
+                <ul className="border-t p-4 space-y-2">
+                  {books.map((book) => (
+                    <li key={book.slug}>
+                      <Link
+                        to={`/books/${book.slug}`}
+                        className="text-blue-600 hover:underline"
+                      >
+                        📘 {book.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

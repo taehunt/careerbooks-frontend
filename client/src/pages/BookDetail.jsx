@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import ReactMarkdown from "react-markdown";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const UPLOADS = import.meta.env.VITE_UPLOADS_URL;
@@ -12,6 +13,16 @@ function BookDetail() {
   const [hasAccess, setHasAccess] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [customDescription, setCustomDescription] = useState("");
+
+  useEffect(() => {
+    if (slug) {
+      axios
+        .get(`${API}/api/books/${slug}/description`)
+        .then((res) => setCustomDescription(res.data.description || ""))
+        .catch(() => setCustomDescription(""));
+    }
+  }, [slug]);
 
   useEffect(() => {
     setNotFound(false);
@@ -108,11 +119,18 @@ function BookDetail() {
       ) : book ? (
         <>
           <div className="text-sm text-blue-600 mb-2 space-x-1">
-            <Link to="/" className="hover:underline">홈</Link>
+            <Link to="/" className="hover:underline">
+              홈
+            </Link>
             <span>&gt;</span>
-            <Link to="/books" className="hover:underline">전자책 목록</Link>
+            <Link to="/books" className="hover:underline">
+              전자책 목록
+            </Link>
             <span>&gt;</span>
-            <Link to={`/books?category=${book.category}`} className="hover:underline">
+            <Link
+              to={`/books?category=${book.category}`}
+              className="hover:underline"
+            >
               {categoryLabels[book.category] || book.category}
             </Link>
           </div>
@@ -134,7 +152,8 @@ function BookDetail() {
                   <span className="ml-2 text-sm text-green-600">
                     (
                     {Math.round(
-                      ((book.originalPrice - book.price) / book.originalPrice) * 100
+                      ((book.originalPrice - book.price) / book.originalPrice) *
+                        100
                     )}
                     % 할인)
                   </span>
@@ -149,24 +168,8 @@ function BookDetail() {
             <h3 className="text-xl font-semibold text-gray-800 mb-3 border-l-4 border-blue-500 pl-4">
               💡 서비스 설명
             </h3>
-            <div className="text-gray-700 leading-relaxed">
-              <p>📌 이런 분들에게 꼭 추천드립니다</p>
-              <ul className="list-disc list-inside my-4">
-                <li>비전공자지만 웹 개발을 시작하고 싶은 분</li>
-                <li>실전 프로젝트로 포트폴리오를 만들고 싶은 분</li>
-                <li>HTML, CSS, React, Express, MongoDB까지 실제 서비스 흐름을 익히고 싶은 분</li>
-                <li>이직, 부업, 창업 등 실용적인 웹 제작 경험이 필요한 분</li>
-              </ul>
-              <p>
-                이 전자책은 단순한 이론서가 아닙니다.
-                <br />
-                실전 중심으로 구성되어 있어 실제 서비스처럼 기획하고, 만들고,
-                배포할 수 있는 방법을 알려드립니다.
-                <br />
-                지금 시작하지 않으면, 내일도 똑같은 자리에 머물러 있을지도
-                모릅니다.
-              </p>
-              <p className="mt-4 font-bold text-blue-600">이 기회를 잡아보세요!</p>
+            <div className="prose prose-sm max-w-none leading-relaxed text-gray-800">
+              <ReactMarkdown>{customDescription}</ReactMarkdown>
             </div>
           </div>
 

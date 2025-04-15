@@ -160,7 +160,9 @@ function Navbar() {
             <Link
               to="/books/categories"
               className="block py-2"
-              onClick={() => setMenuOpen(false)}
+              onClick={() => {
+                setMenuOpen(false);
+              }}
             >
               전자책
             </Link>
