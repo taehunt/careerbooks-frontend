@@ -4,10 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-	"prepare": "npm install --legacy-peer-deps",
-	"build": "vite build",
-	"dev": "vite",
-	"preview": "vite preview"
+    "build": "npm install --legacy-peer-deps && vite build",
+    "dev": "vite",
+    "preview": "vite preview"
+  },
+  "engines": {
+    "node": "18.x"
   },
   "homepage": "https://careerbooks.shop",
   "dependencies": {
