@@ -29,6 +29,7 @@ function BookList() {
       .get(url)
       .then((res) => setBooks(res.data))
       .catch((err) => console.error("도서 목록 불러오기 실패:", err));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search]);
 
   return (
