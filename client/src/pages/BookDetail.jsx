@@ -8,6 +8,7 @@ function BookDetail() {
   const [book, setBook] = useState(null);
   const [hasAccess, setHasAccess] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     setNotFound(false);
@@ -137,8 +138,7 @@ function BookDetail() {
                   <span className="ml-2 text-sm text-green-600">
                     (
                     {Math.round(
-                      ((book.originalPrice - book.price) /
-                        book.originalPrice) *
+                      ((book.originalPrice - book.price) / book.originalPrice) *
                         100
                     )}
                     % 할인)
@@ -159,28 +159,50 @@ function BookDetail() {
               <ul className="list-disc list-inside my-4">
                 <li>비전공자지만 웹 개발을 시작하고 싶은 분</li>
                 <li>실전 프로젝트로 포트폴리오를 만들고 싶은 분</li>
-                <li>HTML, CSS, React, Express, MongoDB까지 실제 서비스 흐름을 익히고 싶은 분</li>
+                <li>
+                  HTML, CSS, React, Express, MongoDB까지 실제 서비스 흐름을
+                  익히고 싶은 분
+                </li>
                 <li>이직, 부업, 창업 등 실용적인 웹 제작 경험이 필요한 분</li>
               </ul>
               <p>
-                이 전자책은 단순한 이론서가 아닙니다.<br />
+                이 전자책은 단순한 이론서가 아닙니다.
+                <br />
                 실전 중심으로 구성되어 있어 실제 서비스처럼 기획하고, 만들고,
-                배포할 수 있는 방법을 알려드립니다.<br />
-                지금 시작하지 않으면, 내일도 똑같은 자리에 머물러 있을지도 모릅니다.
+                배포할 수 있는 방법을 알려드립니다.
+                <br />
+                지금 시작하지 않으면, 내일도 똑같은 자리에 머물러 있을지도
+                모릅니다.
               </p>
-              <p className="mt-4 font-bold text-blue-600">이 기회를 잡아보세요!</p>
+              <p className="mt-4 font-bold text-blue-600">
+                이 기회를 잡아보세요!
+              </p>
             </div>
           </div>
 
           <div className="mb-10">
-            <h3 className="text-xl font-semibold text-gray-800 mb-3 border-l-4 border-green-500 pl-4">
-              📖 미리보기 이미지
+            <h3 className="text-xl font-semibold text-gray-800 mb-3 border-l-4 border-green-500 pl-4 flex justify-between items-center">
+              <span>📖 미리보기 이미지</span>
+              <button
+                onClick={() => setShowPreview(!showPreview)}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                {showPreview ? "닫기 ▲" : "열기 ▼"}
+              </button>
             </h3>
-            <div className="grid gap-4">
+
+            {/* ✅ Collapse 영역 */}
+            <div
+              className={`grid gap-4 transition-all duration-500 overflow-hidden ${
+                showPreview ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
+              }`}
+            >
               {Array.from({ length: 5 }).map((_, idx) => (
                 <img
                   key={idx}
-                  src={`${import.meta.env.VITE_UPLOADS_URL}/${slug}_preview0${idx + 1}.png`}
+                  src={`${import.meta.env.VITE_UPLOADS_URL}/${slug}_preview0${
+                    idx + 1
+                  }.png`}
                   alt={`미리보기 ${idx + 1}`}
                   className="w-full border rounded shadow hover:shadow-lg transition"
                 />

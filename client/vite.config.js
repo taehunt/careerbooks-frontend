@@ -1,14 +1,19 @@
 // client/vite.config.js
-import { defineConfig, loadEnv } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
+import { defineConfig, loadEnv } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
 
 export default defineConfig(({ mode }) => {
-  loadEnv(mode, process.cwd()) // 환경 변수는 로딩만 해주면 됨
+  loadEnv(mode, process.cwd()); // 환경 변수는 로딩만 해주면 됨
 
   return {
     plugins: [react()],
-    base: '/',
+    base: "/",
+    server: {
+      proxy: {
+        "/api": "http://localhost:5000",
+      },
+    },
     build: {
       rollupOptions: {
         output: {
@@ -20,8 +25,8 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, 'src'),
+        "@": path.resolve(__dirname, "src"),
       },
     },
-  }
-})
+  };
+});
