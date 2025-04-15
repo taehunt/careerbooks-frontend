@@ -14,6 +14,7 @@ function Admin() {
     textAlign: "left",
     fontSize: "24px",
   });
+
   const [form, setForm] = useState({
     title: "",
     slug: "",
@@ -24,6 +25,7 @@ function Admin() {
     category: "frontend",
     file: null,
   });
+
   const [users, setUsers] = useState([]);
   const [books, setBooks] = useState([]);
   const [editRowId, setEditRowId] = useState(null); // 수정 중인 행 ID
@@ -91,17 +93,24 @@ function Admin() {
   };
 
   // ✅ 회원 목록 불러오기
-  useEffect(() => {
-    axios
-      .get("/api/admin/users")
-      .then((res) => {
-        const data = Array.isArray(res.data) ? res.data : res.data?.users || [];
-        setUsers(data);
-      })
-      .catch((err) => {
-        console.error("회원 목록 불러오기 실패", err);
-        setUsers([]);
-      });
+useEffect(() => {
+	axios
+	  .get("/api/admin/users", { withCredentials: true }) // ✅ 여기!
+	  .then((res) => {
+		console.log("회원 목록 응답:", res.data);
+		if (Array.isArray(res.data)) {
+		  setUsers(res.data);
+		} else if (res.data && Array.isArray(res.data.users)) {
+		  setUsers(res.data.users);
+		} else {
+		  console.warn("회원 목록이 배열이 아님:", res.data);
+		  setUsers([]);
+		}
+	  })
+	  .catch((err) => {
+		console.error("회원 목록 불러오기 실패", err);
+		setUsers([]);
+	  });
   }, []);
 
   return (
@@ -155,7 +164,9 @@ function Admin() {
                   )}
                 </td>
 
-                <td className="border p-2 w-[90px] text-center hidden sm:table-cell">{book.slug}</td>
+                <td className="border p-2 w-[90px] text-center hidden sm:table-cell">
+                  {book.slug}
+                </td>
 
                 <td className="border p-2 w-[70px] text-center">
                   {editRowId === book._id ? (
