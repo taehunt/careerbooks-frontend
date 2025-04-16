@@ -117,7 +117,25 @@ function Admin() {
                       <td className="border p-2 text-right">{book.price.toLocaleString()}원</td>
                       <td className="border p-2 text-right">{book.originalPrice.toLocaleString()}원</td>
                       <td className="border p-2 text-center space-x-2">
-                        <Link to={`/admin/books/edit?slug=${book.slug}`} className="text-blue-600 hover:underline text-sm">
+                        <button
+                          onClick={() => {
+                            setEditRowId(book._id);
+                            setEditForm({
+                              title: book.title,
+                              titleIndex: book.titleIndex,
+                              category: book.category,
+                              price: book.price,
+                              originalPrice: book.originalPrice,
+                            });
+                          }}
+                          className="text-green-600 hover:underline text-sm"
+                        >
+                          수정
+                        </button>
+                        <Link
+                          to={`/admin/books/edit?slug=${book.slug}`}
+                          className="text-blue-600 hover:underline text-sm"
+                        >
                           설명 수정
                         </Link>
                         <button
