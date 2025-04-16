@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const UPLOADS = import.meta.env.VITE_UPLOADS_URL;
@@ -159,7 +161,12 @@ function BookDetail() {
               💡 서비스 설명
             </h3>
             <div className="prose prose-sm max-w-none leading-relaxed text-gray-800">
-              <ReactMarkdown>{customDescription}</ReactMarkdown>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm, remarkBreaks]}
+                className="prose prose-sm max-w-none leading-relaxed text-gray-800"
+              >
+                {customDescription}
+              </ReactMarkdown>
             </div>
           </div>
 
