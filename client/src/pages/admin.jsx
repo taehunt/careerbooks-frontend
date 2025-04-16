@@ -77,6 +77,18 @@ function Admin() {
     }
   };
 
+  const saveEdit = async (id) => {
+    try {
+      await axios.put(`${API}/api/admin/books/${id}`, editForm);
+      const res = await axios.get(`${API}/api/books`);
+      setBooks(res.data.sort((a, b) => a.titleIndex - b.titleIndex));
+      setEditRowId(null);
+      setEditForm({});
+    } catch (err) {
+      alert(err.response?.data?.message || "수정 실패");
+    }
+  };
+
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-8">
       <h1 className="text-3xl font-bold mb-6">관리자 페이지</h1>
@@ -110,46 +122,137 @@ function Admin() {
                 <tbody>
                   {currentBooks.map((book) => (
                     <tr key={book._id}>
-                      <td className="border p-2 text-center">{book.titleIndex}</td>
-                      <td className="border p-2">{book.title}</td>
-                      <td className="border p-2">{book.slug}</td>
-                      <td className="border p-2">{book.category}</td>
-                      <td className="border p-2 text-right">{book.price.toLocaleString()}원</td>
-                      <td className="border p-2 text-right">{book.originalPrice.toLocaleString()}원</td>
-                      <td className="border p-2 text-center space-x-2">
-                        <button
-                          onClick={() => {
-                            setEditRowId(book._id);
-                            setEditForm({
-                              title: book.title,
-                              titleIndex: book.titleIndex,
-                              category: book.category,
-                              price: book.price,
-                              originalPrice: book.originalPrice,
-                            });
-                          }}
-                          className="text-green-600 hover:underline text-sm"
-                        >
-                          수정
-                        </button>
-                        <Link
-                          to={`/admin/books/edit?slug=${book.slug}`}
-                          className="text-blue-600 hover:underline text-sm"
-                        >
-                          설명 수정
-                        </Link>
-                        <button
-                          onClick={async () => {
-                            if (window.confirm("정말 삭제하시겠습니까?")) {
-                              await axios.delete(`${API}/api/admin/books/${book._id}`);
-                              const res = await axios.get(`${API}/api/books`);
-                              setBooks(res.data.sort((a, b) => a.titleIndex - b.titleIndex));
+                      <td className="border p-2 text-center">
+                        {editRowId === book._id ? (
+                          <input
+                            type="number"
+                            value={editForm.titleIndex}
+                            onChange={(e) =>
+                              setEditForm({ ...editForm, titleIndex: e.target.value })
                             }
-                          }}
-                          className="text-red-600 hover:underline text-sm"
-                        >
-                          삭제
-                        </button>
+                            className="w-16 border px-1"
+                          />
+                        ) : (
+                          book.titleIndex
+                        )}
+                      </td>
+                      <td className="border p-2">
+                        {editRowId === book._id ? (
+                          <input
+                            type="text"
+                            value={editForm.title}
+                            onChange={(e) =>
+                              setEditForm({ ...editForm, title: e.target.value })
+                            }
+                            className="w-full border px-1"
+                          />
+                        ) : (
+                          book.title
+                        )}
+                      </td>
+                      <td className="border p-2">{book.slug}</td>
+                      <td className="border p-2">
+                        {editRowId === book._id ? (
+                          <select
+                            value={editForm.category}
+                            onChange={(e) =>
+                              setEditForm({ ...editForm, category: e.target.value })
+                            }
+                            className="border px-1"
+                          >
+                            <option value="frontend">프론트엔드</option>
+                            <option value="backend">백엔드</option>
+                            <option value="design">웹디자인</option>
+                            <option value="planning">웹기획</option>
+                          </select>
+                        ) : (
+                          book.category
+                        )}
+                      </td>
+                      <td className="border p-2 text-right">
+                        {editRowId === book._id ? (
+                          <input
+                            type="number"
+                            value={editForm.price}
+                            onChange={(e) =>
+                              setEditForm({ ...editForm, price: e.target.value })
+                            }
+                            className="w-20 border px-1 text-right"
+                          />
+                        ) : (
+                          `${book.price.toLocaleString()}원`
+                        )}
+                      </td>
+                      <td className="border p-2 text-right">
+                        {editRowId === book._id ? (
+                          <input
+                            type="number"
+                            value={editForm.originalPrice}
+                            onChange={(e) =>
+                              setEditForm({ ...editForm, originalPrice: e.target.value })
+                            }
+                            className="w-20 border px-1 text-right"
+                          />
+                        ) : (
+                          `${book.originalPrice.toLocaleString()}원`
+                        )}
+                      </td>
+                      <td className="border p-2 text-center space-x-2">
+                        {editRowId === book._id ? (
+                          <>
+                            <button
+                              onClick={() => saveEdit(book._id)}
+                              className="text-green-600 hover:underline text-sm"
+                            >
+                              저장
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditRowId(null);
+                                setEditForm({});
+                              }}
+                              className="text-gray-600 hover:underline text-sm"
+                            >
+                              취소
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => {
+                                setEditRowId(book._id);
+                                setEditForm({
+                                  title: book.title,
+                                  titleIndex: book.titleIndex,
+                                  category: book.category,
+                                  price: book.price,
+                                  originalPrice: book.originalPrice,
+                                });
+                              }}
+                              className="text-green-600 hover:underline text-sm"
+                            >
+                              수정
+                            </button>
+                            <Link
+                              to={`/admin/books/edit?slug=${book.slug}`}
+                              className="text-blue-600 hover:underline text-sm"
+                            >
+                              설명 수정
+                            </Link>
+                            <button
+                              onClick={async () => {
+                                if (window.confirm("정말 삭제하시겠습니까?")) {
+                                  await axios.delete(`${API}/api/admin/books/${book._id}`);
+                                  const res = await axios.get(`${API}/api/books`);
+                                  setBooks(res.data.sort((a, b) => a.titleIndex - b.titleIndex));
+                                }
+                              }}
+                              className="text-red-600 hover:underline text-sm"
+                            >
+                              삭제
+                            </button>
+                          </>
+                        )}
                       </td>
                     </tr>
                   ))}
