@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import axios from "axios";
 import MarkdownIt from "markdown-it";
 import MdEditor from "react-markdown-editor-lite";
@@ -57,7 +56,6 @@ function EditBookDescription() {
     <div className="max-w-5xl mx-auto px-4 py-10">
       <h1 className="text-2xl font-bold mb-6">📘 전자책 설명 수정</h1>
 
-      {/* 책 선택 */}
       <div className="mb-6">
         <label className="block mb-2 font-medium">전자책 선택</label>
         <select
@@ -74,7 +72,6 @@ function EditBookDescription() {
         </select>
       </div>
 
-      {/* 에디터 */}
       {selectedSlug && (
         <div className="space-y-4">
           {loading ? (
