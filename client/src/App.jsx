@@ -25,7 +25,7 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 
 // 관리자 페이지 (관리자만 접근)
 import Admin from "./pages/admin";
-import EditBookDescription from "./pages/admin/EditBookDescription";
+import EditBookDescription from "./pages/EditBookDescription";
 
 function App() {
   const { user } = useContext(AuthContext);
