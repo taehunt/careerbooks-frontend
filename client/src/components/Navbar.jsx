@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import logo from "../images/logo.png";
@@ -8,7 +8,7 @@ function Navbar() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [ebookOpen, setEbookOpen] = useState(false);
-  const [ebookDropdownOpen, setEbookDropdownOpen] = useState(false);
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -44,30 +44,29 @@ function Navbar() {
             홈
           </Link>
 
-          {/* 전자책 드롭다운 */}
-          <div className="relative">
+          {/* 전자책 hover 드롭다운 */}
+          <div
+            className="relative group"
+          >
             <button
-              onClick={() => setEbookDropdownOpen(!ebookDropdownOpen)}
               className="hover:text-blue-500 navMenu block py-2"
             >
               전자책
             </button>
-            {ebookDropdownOpen && (
-              <div className="absolute left-0 mt-1 w-48 bg-white border rounded shadow-lg z-10">
-                <Link to="/books?category=planning" className="block px-4 py-2 text-sm hover:bg-gray-100">
-                  웹기획
-                </Link>
-                <Link to="/books?category=design" className="block px-4 py-2 text-sm hover:bg-gray-100">
-                  웹디자인
-                </Link>
-                <Link to="/books?category=frontend" className="block px-4 py-2 text-sm hover:bg-gray-100">
-                  프론트엔드 개발
-                </Link>
-                <Link to="/books?category=backend" className="block px-4 py-2 text-sm hover:bg-gray-100">
-                  백엔드 개발
-                </Link>
-              </div>
-            )}
+            <div className="hidden group-hover:block absolute left-0 mt-1 w-48 bg-white border rounded shadow-lg z-10">
+              <Link to="/books?category=planning" className="block px-4 py-2 text-sm hover:bg-gray-100">
+                웹기획
+              </Link>
+              <Link to="/books?category=design" className="block px-4 py-2 text-sm hover:bg-gray-100">
+                웹디자인
+              </Link>
+              <Link to="/books?category=frontend" className="block px-4 py-2 text-sm hover:bg-gray-100">
+                프론트엔드 개발
+              </Link>
+              <Link to="/books?category=backend" className="block px-4 py-2 text-sm hover:bg-gray-100">
+                백엔드 개발
+              </Link>
+            </div>
           </div>
 
           {user ? (
@@ -76,9 +75,27 @@ function Navbar() {
                 내 책보기
               </Link>
               {user.role === "admin" && (
-                <Link to="/admin" className="hover:text-blue-500 navMenu block py-2">
-                  관리자
-                </Link>
+                <div className="relative group">
+                  <button
+                    className="hover:text-blue-500 navMenu block py-2"
+                  >
+                    관리자
+                  </button>
+                  <div className="hidden group-hover:block absolute left-0 mt-1 w-52 bg-white border rounded shadow-lg z-10">
+                    <Link to="/admin" className="block px-4 py-2 text-sm hover:bg-gray-100">
+                      📚 전자책 목록
+                    </Link>
+                    <Link to="/admin/books/upload" className="block px-4 py-2 text-sm hover:bg-gray-100">
+                      ➕ 전자책 등록
+                    </Link>
+                    <Link to="/admin/books/edit" className="block px-4 py-2 text-sm hover:bg-gray-100">
+                      ✍️ 설명 수정
+                    </Link>
+                    <Link to="/admin/users" className="block px-4 py-2 text-sm hover:bg-gray-100">
+                      👥 회원 목록
+                    </Link>
+                  </div>
+                </div>
               )}
               <button onClick={handleLogout} className="text-red-500 hover:underline navMenu block py-2">
                 로그아웃
@@ -134,9 +151,30 @@ function Navbar() {
                   내 책
                 </Link>
                 {user.role === "admin" && (
-                  <Link to="/admin" className="block py-2" onClick={() => setMenuOpen(false)}>
-                    관리자
-                  </Link>
+                  <div>
+                    <button
+                      onClick={() => setAdminMenuOpen(!adminMenuOpen)}
+                      className="block w-full text-left py-2"
+                    >
+                      관리자 {adminMenuOpen ? "▲" : "▼"}
+                    </button>
+                    {adminMenuOpen && (
+                      <div className="ml-4 space-y-2">
+                        <Link to="/admin" className="block" onClick={() => setMenuOpen(false)}>
+                          📚 전자책 목록
+                        </Link>
+                        <Link to="/admin/books/upload" className="block" onClick={() => setMenuOpen(false)}>
+                          ➕ 전자책 등록
+                        </Link>
+                        <Link to="/admin/books/edit" className="block" onClick={() => setMenuOpen(false)}>
+                          ✍️ 설명 수정
+                        </Link>
+                        <Link to="/admin/users" className="block" onClick={() => setMenuOpen(false)}>
+                          👥 회원 목록
+                        </Link>
+                      </div>
+                    )}
+                  </div>
                 )}
                 <button
                   onClick={() => {
