@@ -52,31 +52,44 @@ function BookDetail() {
       });
   }, [slug]);
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     const token = localStorage.getItem("token");
     if (!token) {
       alert("로그인이 필요합니다.");
       return;
     }
-    try {
-      const response = await fetch(`${API}/api/downloads/${slug}`, {
+
+    const downloadUrl = `${API}/api/downloads/${slug}`;
+
+    // 모바일 여부 확인
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      // 모바일은 새 창으로 열기만
+      window.open(downloadUrl, "_blank");
+    } else {
+      // PC는 다운로드 동작
+      fetch(downloadUrl, {
         headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!response.ok) throw new Error("다운로드 실패");
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = book.fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      alert("다운로드 오류");
-      console.error(err);
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error("다운로드 실패");
+          return res.blob();
+        })
+        .then((blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = book.fileName;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+        })
+        .catch((err) => {
+          alert("다운로드 오류");
+          console.error(err);
+        });
     }
   };
 
@@ -202,12 +215,29 @@ function BookDetail() {
 
           <div className="text-center">
             {hasAccess ? (
-              <button
-                onClick={handleDownload}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow"
-              >
-                다운로드
-              </button>
+              <>
+                <button
+                  onClick={handleDownload}
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow"
+                >
+                  다운로드
+                </button>
+                {/* 📱 모바일 사용자 안내 문구 */}
+                {typeof window !== "undefined" &&
+                  /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && (
+                    <p className="mt-3 text-sm text-gray-500 leading-snug">
+                      모바일에서는 파일이{" "}
+                      <span className="text-blue-600 font-semibold">새 창</span>
+                      으로 열립니다.
+                      <br />
+                      열린 창에서{" "}
+                      <span className="text-blue-600 font-semibold">
+                        공유 버튼
+                      </span>
+                      을 눌러 저장하세요 😊
+                    </p>
+                  )}
+              </>
             ) : (
               <button
                 onClick={handlePurchase}
