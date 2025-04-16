@@ -34,13 +34,14 @@ function MyBooks() {
     const token = localStorage.getItem("token");
     const downloadUrl = `${API}/api/downloads/${slug}`;
 
-    // 다운로드는 브라우저가 직접 열도록 처리 (CORS 회피)
     const a = document.createElement("a");
     a.href = downloadUrl;
     a.target = "_blank";
     a.rel = "noopener noreferrer";
 
+    document.body.appendChild(a); // ✅ 안정성 향상
     a.click();
+    document.body.removeChild(a); // ✅ 메모리 정리
   };
 
   return (

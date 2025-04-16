@@ -27,12 +27,32 @@ function Navbar() {
           onClick={() => setMenuOpen(!menuOpen)}
         >
           {menuOpen ? (
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           ) : (
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
           )}
         </button>
@@ -45,23 +65,32 @@ function Navbar() {
 
           {/* 전자책 hover 드롭다운 */}
           <div className="relative group">
-            <button className="hover:text-blue-500 navMenu block py-2">
+            <div className="hover:text-blue-500 navMenu block py-2 cursor-pointer">
               전자책
-            </button>
-            <div className="absolute left-0 mt-2 group-hover:block hidden w-48 bg-white border rounded shadow-lg z-10"
-              onMouseEnter={(e) => e.currentTarget.classList.add("block")}
-              onMouseLeave={(e) => e.currentTarget.classList.remove("block")}
-            >
-              <Link to="/books?category=planning" className="block px-4 py-2 text-sm hover:bg-gray-100">
+            </div>
+            <div className="absolute left-0 mt-2 w-48 bg-white border rounded shadow-lg z-10 opacity-0 invisible group-hover:visible group-hover:opacity-100 transition-opacity duration-200">
+              <Link
+                to="/books?category=planning"
+                className="block px-4 py-2 text-sm hover:bg-gray-100"
+              >
                 웹기획
               </Link>
-              <Link to="/books?category=design" className="block px-4 py-2 text-sm hover:bg-gray-100">
+              <Link
+                to="/books?category=design"
+                className="block px-4 py-2 text-sm hover:bg-gray-100"
+              >
                 웹디자인
               </Link>
-              <Link to="/books?category=frontend" className="block px-4 py-2 text-sm hover:bg-gray-100">
+              <Link
+                to="/books?category=frontend"
+                className="block px-4 py-2 text-sm hover:bg-gray-100"
+              >
                 프론트엔드 개발
               </Link>
-              <Link to="/books?category=backend" className="block px-4 py-2 text-sm hover:bg-gray-100">
+              <Link
+                to="/books?category=backend"
+                className="block px-4 py-2 text-sm hover:bg-gray-100"
+              >
                 백엔드 개발
               </Link>
             </div>
@@ -69,24 +98,39 @@ function Navbar() {
 
           {user ? (
             <>
-              <Link to="/mybooks" className="hover:text-blue-500 navMenu block py-2">
+              <Link
+                to="/mybooks"
+                className="hover:text-blue-500 navMenu block py-2"
+              >
                 내 책보기
               </Link>
               {user.role === "admin" && (
-                <Link to="/admin" className="hover:text-blue-500 navMenu block py-2">
+                <Link
+                  to="/admin"
+                  className="hover:text-blue-500 navMenu block py-2"
+                >
                   관리자
                 </Link>
               )}
-              <button onClick={handleLogout} className="text-red-500 hover:underline navMenu block py-2">
+              <button
+                onClick={handleLogout}
+                className="text-red-500 hover:underline navMenu block py-2"
+              >
                 로그아웃
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="hover:text-blue-500 navMenu block py-2">
+              <Link
+                to="/login"
+                className="hover:text-blue-500 navMenu block py-2"
+              >
                 로그인
               </Link>
-              <Link to="/signup" className="hover:text-blue-500 navMenu block py-2">
+              <Link
+                to="/signup"
+                className="hover:text-blue-500 navMenu block py-2"
+              >
                 회원가입
               </Link>
             </>
@@ -97,28 +141,54 @@ function Navbar() {
       {/* 모바일 전체 메뉴 */}
       {menuOpen && (
         <>
-          <div className="fixed inset-0 bg-black/30 z-40" onClick={() => setMenuOpen(false)}></div>
+          <div
+            className="fixed inset-0 bg-black/30 z-40"
+            onClick={() => setMenuOpen(false)}
+          ></div>
           <div className="fixed top-0 right-0 w-3/4 h-full bg-white z-50 p-6 text-base space-y-4">
-            <Link to="/" className="block py-2" onClick={() => setMenuOpen(false)}>
+            <Link
+              to="/"
+              className="block py-2"
+              onClick={() => setMenuOpen(false)}
+            >
               홈
             </Link>
 
             <div>
-              <button onClick={() => setEbookOpen(!ebookOpen)} className="block w-full text-left py-2">
+              <button
+                onClick={() => setEbookOpen(!ebookOpen)}
+                className="block w-full text-left py-2"
+              >
                 전자책
               </button>
               {ebookOpen && (
                 <div className="ml-4 space-y-2">
-                  <Link to="/books?category=planning" className="block" onClick={() => setMenuOpen(false)}>
+                  <Link
+                    to="/books?category=planning"
+                    className="block"
+                    onClick={() => setMenuOpen(false)}
+                  >
                     웹기획
                   </Link>
-                  <Link to="/books?category=design" className="block" onClick={() => setMenuOpen(false)}>
+                  <Link
+                    to="/books?category=design"
+                    className="block"
+                    onClick={() => setMenuOpen(false)}
+                  >
                     웹디자인
                   </Link>
-                  <Link to="/books?category=frontend" className="block" onClick={() => setMenuOpen(false)}>
+                  <Link
+                    to="/books?category=frontend"
+                    className="block"
+                    onClick={() => setMenuOpen(false)}
+                  >
                     프론트엔드 개발
                   </Link>
-                  <Link to="/books?category=backend" className="block" onClick={() => setMenuOpen(false)}>
+                  <Link
+                    to="/books?category=backend"
+                    className="block"
+                    onClick={() => setMenuOpen(false)}
+                  >
                     백엔드 개발
                   </Link>
                 </div>
@@ -127,11 +197,19 @@ function Navbar() {
 
             {user ? (
               <>
-                <Link to="/mybooks" className="block py-2" onClick={() => setMenuOpen(false)}>
+                <Link
+                  to="/mybooks"
+                  className="block py-2"
+                  onClick={() => setMenuOpen(false)}
+                >
                   내 책
                 </Link>
                 {user.role === "admin" && (
-                  <Link to="/admin" className="block py-2" onClick={() => setMenuOpen(false)}>
+                  <Link
+                    to="/admin"
+                    className="block py-2"
+                    onClick={() => setMenuOpen(false)}
+                  >
                     관리자
                   </Link>
                 )}
@@ -147,10 +225,18 @@ function Navbar() {
               </>
             ) : (
               <>
-                <Link to="/login" className="block py-2" onClick={() => setMenuOpen(false)}>
+                <Link
+                  to="/login"
+                  className="block py-2"
+                  onClick={() => setMenuOpen(false)}
+                >
                   로그인
                 </Link>
-                <Link to="/signup" className="block py-2" onClick={() => setMenuOpen(false)}>
+                <Link
+                  to="/signup"
+                  className="block py-2"
+                  onClick={() => setMenuOpen(false)}
+                >
                   회원가입
                 </Link>
               </>

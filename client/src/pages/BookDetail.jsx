@@ -61,12 +61,13 @@ function BookDetail() {
 
     const downloadUrl = `${API}/api/downloads/${slug}`;
 
-    // ✅ PC/모바일 모두 window.open() 방식으로 통일 (CORS 회피)
     const a = document.createElement("a");
     a.href = downloadUrl;
     a.target = "_blank";
     a.rel = "noopener noreferrer";
+    document.body.appendChild(a); // ✅ 안정성 확보
     a.click();
+    document.body.removeChild(a); // ✅ 메모리 정리
   };
 
   const handlePurchase = async () => {
