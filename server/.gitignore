@@ -2,10 +2,8 @@
 node_modules/
 
 # 환경 변수
-.env
-
-# 업로드 파일
-uploads/
+.env.development
+.env.production
 
 # 로그
 *.log
