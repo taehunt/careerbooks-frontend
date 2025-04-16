@@ -21,8 +21,6 @@ import {
   // 관리자 페이지
   import Admin from "./pages/admin";
   import EditBookDescription from "./pages/admin/EditBookDescription";
-  import UploadBook from "./pages/admin/UploadBook";
-  import UserList from "./pages/admin/UserList";
   
   // 컴포넌트
   import Navbar from "./components/Navbar";
@@ -88,22 +86,6 @@ import {
 			  element={
 				<AdminRoute>
 				  <EditBookDescription />
-				</AdminRoute>
-			  }
-			/>
-			<Route
-			  path="/admin/books/upload"
-			  element={
-				<AdminRoute>
-				  <UploadBook />
-				</AdminRoute>
-			  }
-			/>
-			<Route
-			  path="/admin/users"
-			  element={
-				<AdminRoute>
-				  <UserList />
 				</AdminRoute>
 			  }
 			/>
