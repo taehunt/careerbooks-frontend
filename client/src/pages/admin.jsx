@@ -116,10 +116,22 @@ function Admin() {
                       <td className="border p-2">{book.category}</td>
                       <td className="border p-2 text-right">{book.price.toLocaleString()}원</td>
                       <td className="border p-2 text-right">{book.originalPrice.toLocaleString()}원</td>
-                      <td className="border p-2 text-center">
+                      <td className="border p-2 text-center space-x-2">
                         <Link to={`/admin/books/edit?slug=${book.slug}`} className="text-blue-600 hover:underline text-sm">
                           설명 수정
                         </Link>
+                        <button
+                          onClick={async () => {
+                            if (window.confirm("정말 삭제하시겠습니까?")) {
+                              await axios.delete(`${API}/api/admin/books/${book._id}`);
+                              const res = await axios.get(`${API}/api/books`);
+                              setBooks(res.data.sort((a, b) => a.titleIndex - b.titleIndex));
+                            }
+                          }}
+                          className="text-red-600 hover:underline text-sm"
+                        >
+                          삭제
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -131,14 +143,7 @@ function Admin() {
             <div>
               <h2 className="text-xl font-semibold mb-2">📚 전자책 등록</h2>
               <div className="space-y-2">
-                {[
-                  "titleIndex",
-                  "title",
-                  "description",
-                  "originalPrice",
-                  "price",
-                  "slug",
-                ].map((key) => (
+                {["titleIndex", "title", "description", "originalPrice", "price", "slug"].map((key) => (
                   <input
                     key={key}
                     type={key.includes("Price") || key === "titleIndex" ? "number" : "text"}
