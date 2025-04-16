@@ -52,7 +52,7 @@ function BookDetail() {
       });
   }, [slug]);
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     const token = localStorage.getItem("token");
     if (!token) {
       alert("로그인이 필요합니다.");
@@ -60,35 +60,13 @@ function BookDetail() {
     }
 
     const downloadUrl = `${API}/api/downloads/${slug}`;
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-    if (isMobile) {
-      // ✅ 모바일은 새 창에서 열기
-      window.open(downloadUrl, "_blank");
-    } else {
-      // ✅ PC는 직접 다운로드 처리
-      try {
-        const response = await fetch(downloadUrl, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!response.ok) throw new Error("다운로드 실패");
-
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-
-        a.href = url;
-        a.download = `${slug}.zip`; // ✅ zip 확장자로 지정
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-      } catch (err) {
-        alert("다운로드 오류");
-        console.error(err);
-      }
-    }
+    // ✅ PC/모바일 모두 window.open() 방식으로 통일 (CORS 회피)
+    const a = document.createElement("a");
+    a.href = downloadUrl;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.click();
   };
 
   const handlePurchase = async () => {
