@@ -1,5 +1,3 @@
-// client/src/pages/admin.jsx
-
 import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
@@ -23,7 +21,7 @@ function Admin() {
     titleIndex: "",
     category: "frontend",
     file: null,
-    kmongUrl: "", // ✅ 추가
+    kmongUrl: "",
   });
 
   const [bookCollapse, setBookCollapse] = useState(true);
@@ -31,17 +29,17 @@ function Admin() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!token || !user || user.role !== "admin") {
+      alert("관리자만 접근할 수 있습니다.");
       logout();
-      navigate("/login");
+      navigate("/");
       return;
     }
 
     axios
       .get(`${API}/api/books`)
-      .then((res) =>
-        setBooks(res.data.sort((a, b) => a.titleIndex - b.titleIndex))
-      )
+      .then((res) => setBooks(res.data.sort((a, b) => a.titleIndex - b.titleIndex)))
       .catch((err) => console.error("📘 전자책 목록 불러오기 실패", err));
 
     axios
@@ -51,9 +49,7 @@ function Admin() {
         },
       })
       .then((res) => {
-        const result = Array.isArray(res.data)
-          ? res.data
-          : res.data?.users || [];
+        const result = Array.isArray(res.data) ? res.data : res.data?.users || [];
         setUsers(result);
       })
       .catch((err) => {
@@ -87,7 +83,7 @@ function Admin() {
         titleIndex: "",
         category: "frontend",
         file: null,
-        kmongUrl: "", // ✅ 추가
+        kmongUrl: "",
       });
       await refreshBooks();
     } catch (err) {

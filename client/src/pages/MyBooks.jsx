@@ -38,7 +38,17 @@ function MyBooks() {
       })
       .catch((err) => {
         console.error("내 책 가져오기 오류:", err.message);
-        setError(err.message);
+
+        if (
+          err.message.includes("접근 권한") ||
+          err.message.includes("Unauthorized")
+        ) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          navigate("/login");
+        } else {
+          setError(err.message);
+        }
       });
   }, [navigate]);
 
