@@ -156,6 +156,47 @@ function BookDetail() {
             </div>
           </div>
 
+		  <div className="text-center">
+            {hasAccess ? (
+              <>
+                <button
+                  onClick={handleDownload}
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow"
+                >
+                  회원 다운로드
+                </button>
+				<button
+                  onClick={handleDownload}
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow"
+                >
+                  비회원 다운로드
+                </button>
+                {/* 📱 모바일 사용자 안내 문구 */}
+                {typeof window !== "undefined" &&
+                  /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && (
+                    <p className="mt-3 text-sm text-gray-500 leading-snug">
+                      모바일에서는 파일이{" "}
+                      <span className="text-blue-600 font-semibold">새 창</span>
+                      으로 열립니다.
+                      <br />
+                      열린 창에서{" "}
+                      <span className="text-blue-600 font-semibold">
+                        공유 버튼
+                      </span>
+                      을 눌러 저장하세요 😊
+                    </p>
+                  )}
+              </>
+            ) : (
+              <button
+                onClick={handlePurchase}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow"
+              >
+                구매하기
+              </button>
+            )}
+          </div>
+
           <div className="mb-10">
             <h3 className="text-xl font-semibold text-gray-800 mb-3 border-l-4 border-blue-500 pl-4">
               💡 서비스 설명
@@ -200,41 +241,6 @@ function BookDetail() {
                 />
               ))}
             </div>
-          </div>
-
-          <div className="text-center">
-            {hasAccess ? (
-              <>
-                <button
-                  onClick={handleDownload}
-                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow"
-                >
-                  다운로드
-                </button>
-                {/* 📱 모바일 사용자 안내 문구 */}
-                {typeof window !== "undefined" &&
-                  /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && (
-                    <p className="mt-3 text-sm text-gray-500 leading-snug">
-                      모바일에서는 파일이{" "}
-                      <span className="text-blue-600 font-semibold">새 창</span>
-                      으로 열립니다.
-                      <br />
-                      열린 창에서{" "}
-                      <span className="text-blue-600 font-semibold">
-                        공유 버튼
-                      </span>
-                      을 눌러 저장하세요 😊
-                    </p>
-                  )}
-              </>
-            ) : (
-              <button
-                onClick={handlePurchase}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow"
-              >
-                구매하기
-              </button>
-            )}
           </div>
         </>
       ) : (

@@ -8,15 +8,15 @@ const API = import.meta.env.VITE_API_BASE_URL;
 function Login() {
   const [form, setForm] = useState({ userId: "", password: "" });
   const navigate = useNavigate();
-  const { setUser } = useContext(AuthContext);
+  const { login } = useContext(AuthContext); // ✅ setUser → login 사용
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const res = await axios.post(`${API}/api/auth/login`, form);
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      setUser(res.data.user);
+      const { user, token } = res.data;
+
+      login(user, token); // ✅ 역할 따라 localStorage or sessionStorage 자동 적용
 
       alert("로그인 성공 :)");
       navigate("/");
