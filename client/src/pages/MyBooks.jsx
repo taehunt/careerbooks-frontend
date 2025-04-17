@@ -1,19 +1,23 @@
 // client/src/pages/MyBooks.jsx
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
 function MyBooks() {
   const navigate = useNavigate();
+  const { user, logout } = useContext(AuthContext);
   const [books, setBooks] = useState([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    if (!token) {
+    // ✅ user 정보까지 체크해서 인증 만료 방지
+    if (!token || !user) {
+      logout();
       navigate("/login");
       return;
     }
@@ -38,19 +42,12 @@ function MyBooks() {
       })
       .catch((err) => {
         console.error("내 책 가져오기 오류:", err.message);
-
-        if (
-          err.message.includes("접근 권한") ||
-          err.message.includes("Unauthorized")
-        ) {
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
-          navigate("/login");
-        } else {
-          setError(err.message);
-        }
+        logout();
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        navigate("/login");
       });
-  }, [navigate]);
+  }, [navigate, logout, user]);
 
   const isDownloadable = (purchasedAt) => {
     const deadline = new Date(purchasedAt);
@@ -73,7 +70,6 @@ function MyBooks() {
     a.href = downloadUrl;
     a.target = "_blank";
     a.rel = "noopener noreferrer";
-
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

@@ -7,7 +7,7 @@ const API = import.meta.env.VITE_API_BASE_URL;
 
 function Admin() {
   const navigate = useNavigate();
-  const { logout } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
 
   const [books, setBooks] = useState([]);
   const [users, setUsers] = useState([]);
@@ -29,19 +29,23 @@ function Admin() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const user = JSON.parse(localStorage.getItem("user"));
+
+    // ✅ AuthContext에서 user 가져와서 확인
     if (!token || !user || user.role !== "admin") {
       alert("관리자만 접근할 수 있습니다.");
-      logout();
-      navigate("/");
+      navigate("/login");
       return;
     }
 
+    // ✅ 도서 목록
     axios
       .get(`${API}/api/books`)
-      .then((res) => setBooks(res.data.sort((a, b) => a.titleIndex - b.titleIndex)))
+      .then((res) =>
+        setBooks(res.data.sort((a, b) => a.titleIndex - b.titleIndex))
+      )
       .catch((err) => console.error("📘 전자책 목록 불러오기 실패", err));
 
+    // ✅ 사용자 목록
     axios
       .get(`${API}/api/admin/users`, {
         headers: {
@@ -49,15 +53,18 @@ function Admin() {
         },
       })
       .then((res) => {
-        const result = Array.isArray(res.data) ? res.data : res.data?.users || [];
+        const result = Array.isArray(res.data)
+          ? res.data
+          : res.data?.users || [];
         setUsers(result);
       })
       .catch((err) => {
         console.error("👥 회원 목록 불러오기 실패", err);
+        alert("세션이 만료되었습니다. 다시 로그인해주세요.");
         logout();
         navigate("/login");
       });
-  }, []);
+  }, [user, navigate, logout]);
 
   const refreshBooks = async () => {
     const res = await axios.get(`${API}/api/books`);
