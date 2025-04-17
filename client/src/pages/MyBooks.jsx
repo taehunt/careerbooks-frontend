@@ -1,21 +1,46 @@
+// client/src/pages/MyBooks.jsx
+
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
 function MyBooks() {
+  const navigate = useNavigate();
   const [books, setBooks] = useState([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
     fetch(`${API}/api/books/my-books`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
-      .then((res) => res.json())
-      .then((data) => setBooks(data));
-  }, []);
+      .then((res) => {
+        if (res.status === 403 || res.status === 401) {
+          throw new Error("접근 권한이 없습니다. 다시 로그인해주세요.");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (!Array.isArray(data)) {
+          throw new Error("받은 데이터 형식이 잘못되었습니다.");
+        }
+        setBooks(data);
+      })
+      .catch((err) => {
+        console.error("내 책 가져오기 오류:", err.message);
+        setError(err.message);
+      });
+  }, [navigate]);
 
   const isDownloadable = (purchasedAt) => {
     const deadline = new Date(purchasedAt);
@@ -39,9 +64,9 @@ function MyBooks() {
     a.target = "_blank";
     a.rel = "noopener noreferrer";
 
-    document.body.appendChild(a); // ✅ 안정성 향상
+    document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a); // ✅ 메모리 정리
+    document.body.removeChild(a);
   };
 
   return (
@@ -49,44 +74,50 @@ function MyBooks() {
       <h2 className="text-2xl font-bold mb-6 text-center">
         📚 내가 구매한 전자책
       </h2>
-      {books.length === 0 ? (
+
+      {error ? (
+        <p className="text-center text-red-500 mb-4">{error}</p>
+      ) : books.length === 0 ? (
         <p className="text-center text-gray-500">구매한 책이 없습니다.</p>
       ) : (
         <ul className="space-y-6">
-          {books.map((book) => (
-            <li
-              key={book.slug}
-              className="bg-white border rounded-lg p-4 shadow flex justify-between items-center"
-            >
-              <div>
-                <h3 className="text-lg font-semibold">{book.title}</h3>
-                <p className="text-sm text-gray-600">
-                  구매일: {new Date(book.purchasedAt).toLocaleDateString()}
-                  <br />
-                  다운로드 가능일: 구매일로부터 1년
-                  <br />
-                  남은 기간: {getRemainingDays(book.purchasedAt)}일
-                </p>
-              </div>
-              <div>
-                {isDownloadable(book.purchasedAt) ? (
-                  <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                    onClick={() => handleDownload(book.slug)}
-                  >
-                    다운로드
-                  </button>
-                ) : (
-                  <button
-                    className="bg-gray-400 text-white px-4 py-2 rounded cursor-not-allowed"
-                    disabled
-                  >
-                    다운로드 불가
-                  </button>
-                )}
-              </div>
-            </li>
-          ))}
+          {books.map((book) => {
+            if (!book.slug || !book.purchasedAt) return null;
+            return (
+              <li
+                key={book.slug}
+                className="bg-white border rounded-lg p-4 shadow flex justify-between items-center"
+              >
+                <div>
+                  <h3 className="text-lg font-semibold">{book.title}</h3>
+                  <p className="text-sm text-gray-600">
+                    구매일: {new Date(book.purchasedAt).toLocaleDateString()}
+                    <br />
+                    다운로드 가능일: 구매일로부터 1년
+                    <br />
+                    남은 기간: {getRemainingDays(book.purchasedAt)}일
+                  </p>
+                </div>
+                <div>
+                  {isDownloadable(book.purchasedAt) ? (
+                    <button
+                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                      onClick={() => handleDownload(book.slug)}
+                    >
+                      다운로드
+                    </button>
+                  ) : (
+                    <button
+                      className="bg-gray-400 text-white px-4 py-2 rounded cursor-not-allowed"
+                      disabled
+                    >
+                      다운로드 불가
+                    </button>
+                  )}
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
