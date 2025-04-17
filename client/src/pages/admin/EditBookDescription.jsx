@@ -78,11 +78,11 @@ function EditBookDescription() {
             <p className="text-center text-gray-500">불러오는 중...</p>
           ) : (
             <>
+			
               <MdEditor
                 value={description}
                 renderHTML={(text) => mdParser.render(text)}
                 onChange={({ text }) => {
-                  console.log("저장되는 text:", text); // ✅ 이거로 줄바꿈 있는지 확인
                   setDescription(text); // 꼭 text! html 아님!
                 }}
               />

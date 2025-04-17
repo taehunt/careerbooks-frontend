@@ -160,14 +160,12 @@ function BookDetail() {
             <h3 className="text-xl font-semibold text-gray-800 mb-3 border-l-4 border-blue-500 pl-4">
               💡 서비스 설명
             </h3>
-            <div className="prose prose-sm max-w-none leading-relaxed text-gray-800">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm, remarkBreaks]}
-                className="prose prose-sm max-w-none leading-relaxed text-gray-800"
-              >
-                {customDescription}
-              </ReactMarkdown>
-            </div>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm, remarkBreaks]}
+              className="text-sm text-gray-800 leading-relaxed space-y-4"
+            >
+              {customDescription}
+            </ReactMarkdown>
           </div>
 
           <div className="mb-10">
