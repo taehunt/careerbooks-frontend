@@ -162,9 +162,9 @@ function BookDetail() {
             </h3>
             <ReactMarkdown
               remarkPlugins={[remarkGfm, remarkBreaks]}
-              className="text-sm text-gray-800 leading-relaxed space-y-4 whitespace-pre-line"
+              className="text-sm text-gray-800 leading-relaxed space-y-4"
             >
-              {customDescription}
+              {customDescription.replaceAll("\\n", "\n")}
             </ReactMarkdown>
           </div>
 
