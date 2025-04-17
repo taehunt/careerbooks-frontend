@@ -80,9 +80,11 @@ function EditBookDescription() {
             <>
               <MdEditor
                 value={description}
-                style={{ height: "500px" }}
                 renderHTML={(text) => mdParser.render(text)}
-                onChange={({ text }) => setDescription(text)}
+                onChange={({ text }) => {
+                  console.log("저장되는 text:", text); // ✅ 이거로 줄바꿈 있는지 확인
+                  setDescription(text); // 꼭 text! html 아님!
+                }}
               />
               <div className="text-right mt-4">
                 <button
