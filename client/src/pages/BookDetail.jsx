@@ -162,7 +162,7 @@ function BookDetail() {
             </h3>
             <ReactMarkdown
               remarkPlugins={[remarkGfm, remarkBreaks]}
-              className="text-sm text-gray-800 leading-relaxed space-y-4"
+              className="text-sm text-gray-800 leading-relaxed space-y-4 whitespace-pre-line"
             >
               {customDescription}
             </ReactMarkdown>
