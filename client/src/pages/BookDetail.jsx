@@ -16,6 +16,7 @@ function BookDetail() {
   const [notFound, setNotFound] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [customDescription, setCustomDescription] = useState("");
+  const [purchaseMethod, setPurchaseMethod] = useState("site"); // "site" or "kmong"
 
   useEffect(() => {
     if (slug) {
@@ -156,29 +157,66 @@ function BookDetail() {
             </div>
           </div>
 
-		  <div className="text-center">
-            {hasAccess ? (
+          {/* 구매 버튼 + 토글 */}
+          <div className="text-center">
+            {!hasAccess ? (
+              <>
+                <div className="flex justify-center space-x-2 mb-4">
+                  <button
+                    onClick={() => setPurchaseMethod("site")}
+                    className={`px-4 py-2 rounded ${
+                      purchaseMethod === "site"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
+                  >
+                    홈페이지 구매
+                  </button>
+                  <button
+                    onClick={() => setPurchaseMethod("kmong")}
+                    className={`px-4 py-2 rounded ${
+                      purchaseMethod === "kmong"
+                        ? "bg-yellow-500 text-white"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
+                  >
+                    크몽 구매
+                  </button>
+                </div>
+
+                {purchaseMethod === "site" ? (
+                  <button
+                    onClick={handlePurchase}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow"
+                  >
+                    홈페이지 결제 진행
+                  </button>
+                ) : (
+                  <a
+                    href={book.kmongUrl || "https://kmong.com"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded shadow inline-block"
+                  >
+                    크몽 페이지로 이동
+                  </a>
+                )}
+              </>
+            ) : (
               <>
                 <button
                   onClick={handleDownload}
                   className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow"
                 >
-                  회원 다운로드
+                  다운로드
                 </button>
-				<button
-                  onClick={handleDownload}
-                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow"
-                >
-                  비회원 다운로드
-                </button>
-                {/* 📱 모바일 사용자 안내 문구 */}
+                {/* 📱 모바일 안내문 */}
                 {typeof window !== "undefined" &&
                   /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && (
                     <p className="mt-3 text-sm text-gray-500 leading-snug">
                       모바일에서는 파일이{" "}
                       <span className="text-blue-600 font-semibold">새 창</span>
-                      으로 열립니다.
-                      <br />
+                      으로 열립니다. <br />
                       열린 창에서{" "}
                       <span className="text-blue-600 font-semibold">
                         공유 버튼
@@ -187,13 +225,6 @@ function BookDetail() {
                     </p>
                   )}
               </>
-            ) : (
-              <button
-                onClick={handlePurchase}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow"
-              >
-                구매하기
-              </button>
             )}
           </div>
 

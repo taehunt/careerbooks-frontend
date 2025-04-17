@@ -1,12 +1,16 @@
-/* eslint-disable no-unused-vars */
-import { useState, useEffect } from "react";
+// client/src/pages/admin.jsx
+
+import { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
 function Admin() {
+  const navigate = useNavigate();
+  const { logout } = useContext(AuthContext);
+
   const [books, setBooks] = useState([]);
   const [users, setUsers] = useState([]);
   const [editRowId, setEditRowId] = useState(null);
@@ -14,45 +18,55 @@ function Admin() {
   const [form, setForm] = useState({
     title: "",
     slug: "",
-    description: "",
     originalPrice: "",
     price: "",
     titleIndex: "",
     category: "frontend",
     file: null,
+    kmongUrl: "", // ✅ 추가
   });
 
   const [bookCollapse, setBookCollapse] = useState(true);
   const [userCollapse, setUserCollapse] = useState(false);
 
-  const booksPerPage = 10;
-  const currentPage = 1;
-  const indexOfLastBook = currentPage * booksPerPage;
-  const indexOfFirstBook = indexOfLastBook - booksPerPage;
-  const currentBooks = books.slice(indexOfFirstBook, indexOfLastBook);
-
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      logout();
+      navigate("/login");
+      return;
+    }
+
     axios
       .get(`${API}/api/books`)
       .then((res) =>
         setBooks(res.data.sort((a, b) => a.titleIndex - b.titleIndex))
       )
-      .catch((err) => console.error("전자책 목록 불러오기 실패", err));
+      .catch((err) => console.error("📘 전자책 목록 불러오기 실패", err));
 
     axios
       .get(`${API}/api/admin/users`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) =>
-        setUsers(Array.isArray(res.data) ? res.data : res.data?.users || [])
-      )
+      .then((res) => {
+        const result = Array.isArray(res.data)
+          ? res.data
+          : res.data?.users || [];
+        setUsers(result);
+      })
       .catch((err) => {
-        console.error("회원 목록 불러오기 실패", err);
-        setUsers([]);
+        console.error("👥 회원 목록 불러오기 실패", err);
+        logout();
+        navigate("/login");
       });
   }, []);
+
+  const refreshBooks = async () => {
+    const res = await axios.get(`${API}/api/books`);
+    setBooks(res.data.sort((a, b) => a.titleIndex - b.titleIndex));
+  };
 
   const uploadBook = async () => {
     if (!form.file) return alert("파일을 선택해주세요.");
@@ -64,19 +78,20 @@ function Admin() {
       await axios.post(`${API}/api/admin/books`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      alert("전자책 업로드 완료!");
+      alert("📘 전자책 업로드 완료!");
       setForm({
         title: "",
         slug: "",
-        description: "",
         originalPrice: "",
         price: "",
         titleIndex: "",
         category: "frontend",
         file: null,
+        kmongUrl: "", // ✅ 추가
       });
+      await refreshBooks();
     } catch (err) {
-      console.error("업로드 실패", err);
+      console.error("업로드 실패:", err);
       alert(err.response?.data?.message || "업로드 중 오류 발생");
     }
   };
@@ -84,12 +99,21 @@ function Admin() {
   const saveEdit = async (id) => {
     try {
       await axios.put(`${API}/api/admin/books/${id}`, editForm);
-      const res = await axios.get(`${API}/api/books`);
-      setBooks(res.data.sort((a, b) => a.titleIndex - b.titleIndex));
+      await refreshBooks();
       setEditRowId(null);
       setEditForm({});
     } catch (err) {
       alert(err.response?.data?.message || "수정 실패");
+    }
+  };
+
+  const deleteBook = async (id) => {
+    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+    try {
+      await axios.delete(`${API}/api/admin/books/${id}`);
+      await refreshBooks();
+    } catch (err) {
+      alert("삭제 실패");
     }
   };
 
@@ -120,11 +144,12 @@ function Admin() {
                     <th className="p-2 border">카테고리</th>
                     <th className="p-2 border">가격</th>
                     <th className="p-2 border">정가</th>
+                    <th className="p-2 border">크몽</th> {/* ✅ 추가 */}
                     <th className="p-2 border">관리</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {currentBooks.map((book) => (
+                  {books.map((book) => (
                     <tr key={book._id}>
                       <td className="border p-2 text-center">
                         {editRowId === book._id ? (
@@ -216,6 +241,30 @@ function Admin() {
                           `${book.originalPrice.toLocaleString()}원`
                         )}
                       </td>
+                      <td className="border p-2 text-center">
+                        {editRowId === book._id ? (
+                          <input
+                            type="text"
+                            value={editForm.kmongUrl}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                kmongUrl: e.target.value,
+                              })
+                            }
+                            className="w-full border px-1"
+                          />
+                        ) : (
+                          <a
+                            href={book.kmongUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline text-sm"
+                          >
+                            링크
+                          </a>
+                        )}
+                      </td>
                       <td className="border p-2 text-center space-x-2">
                         {editRowId === book._id ? (
                           <>
@@ -246,28 +295,21 @@ function Admin() {
                                   category: book.category,
                                   price: book.price,
                                   originalPrice: book.originalPrice,
+                                  kmongUrl: book.kmongUrl || "", // ✅ 추가
                                 });
                               }}
                               className="text-green-600 hover:underline text-sm"
                             >
                               수정
                             </button>
+                            <Link
+                              to={`/admin/books/edit?slug=${book.slug}`}
+                              className="text-blue-600 hover:underline text-sm"
+                            >
+                              설명 수정
+                            </Link>
                             <button
-                              onClick={async () => {
-                                if (window.confirm("정말 삭제하시겠습니까?")) {
-                                  await axios.delete(
-                                    `${API}/api/admin/books/${book._id}`
-                                  );
-                                  const res = await axios.get(
-                                    `${API}/api/books`
-                                  );
-                                  setBooks(
-                                    res.data.sort(
-                                      (a, b) => a.titleIndex - b.titleIndex
-                                    )
-                                  );
-                                }
-                              }}
+                              onClick={() => deleteBook(book._id)}
                               className="text-red-600 hover:underline text-sm"
                             >
                               삭제
@@ -281,7 +323,7 @@ function Admin() {
               </table>
             </div>
 
-            {/* 📘 설명 수정 바로가기 */}
+            {/* 📝 설명 수정 바로가기 */}
             <div>
               <h2 className="text-xl font-semibold mb-2">
                 📝 전자책 설명 수정
@@ -298,33 +340,37 @@ function Admin() {
               </Link>
             </div>
 
-            {/* 📚 전자책 등록 */}
+            {/* 📥 전자책 등록 */}
             <div>
-              <h2 className="text-xl font-semibold mb-2">📚 전자책 등록</h2>
+              <h2 className="text-xl font-semibold mb-2">📥 전자책 등록</h2>
               <div className="space-y-2">
-                {[
-                  "titleIndex",
-                  "title",
-                  "description",
-                  "originalPrice",
-                  "price",
-                  "slug",
-                ].map((key) => (
-                  <input
-                    key={key}
-                    type={
-                      key.includes("Price") || key === "titleIndex"
-                        ? "number"
-                        : "text"
-                    }
-                    placeholder={key}
-                    value={form[key]}
-                    onChange={(e) =>
-                      setForm({ ...form, [key]: e.target.value })
-                    }
-                    className="border p-2 w-full"
-                  />
-                ))}
+                {["titleIndex", "title", "originalPrice", "price", "slug"].map(
+                  (key) => (
+                    <input
+                      key={key}
+                      type={
+                        key.includes("Price") || key === "titleIndex"
+                          ? "number"
+                          : "text"
+                      }
+                      placeholder={key}
+                      value={form[key]}
+                      onChange={(e) =>
+                        setForm({ ...form, [key]: e.target.value })
+                      }
+                      className="border p-2 w-full"
+                    />
+                  )
+                )}
+                <input
+                  type="text"
+                  placeholder="kmongUrl"
+                  value={form.kmongUrl}
+                  onChange={(e) =>
+                    setForm({ ...form, kmongUrl: e.target.value })
+                  }
+                  className="border p-2 w-full"
+                />
                 <select
                   value={form.category}
                   onChange={(e) =>
