@@ -160,12 +160,19 @@ function BookDetail() {
             <h3 className="text-xl font-semibold text-gray-800 mb-3 border-l-4 border-blue-500 pl-4">
               💡 서비스 설명
             </h3>
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm, remarkBreaks]}
-              className="text-sm text-gray-800 leading-relaxed space-y-4"
-            >
-              {customDescription.replaceAll("\\n", "\n")}
-            </ReactMarkdown>
+            <div className="text-sm text-gray-800 leading-relaxed space-y-4 whitespace-pre-wrap break-words">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  p: ({ node, ...props }) => <p className="mb-2" {...props} />,
+                  li: ({ node, ...props }) => (
+                    <li className="list-disc ml-5" {...props} />
+                  ),
+                }}
+              >
+                {customDescription}
+              </ReactMarkdown>
+            </div>
           </div>
 
           <div className="mb-10">
