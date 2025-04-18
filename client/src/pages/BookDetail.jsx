@@ -119,9 +119,13 @@ function BookDetail() {
       ) : book ? (
         <>
           <div className="text-sm text-blue-600 mb-2 space-x-1">
-            <Link to="/" className="hover:underline">홈</Link>
+            <Link to="/" className="hover:underline">
+              홈
+            </Link>
             <span>&gt;</span>
-            <Link to="/books" className="hover:underline">전자책 목록</Link>
+            <Link to="/books" className="hover:underline">
+              전자책 목록
+            </Link>
             <span>&gt;</span>
             <Link
               to={`/books?category=${book.category}`}
@@ -146,10 +150,12 @@ function BookDetail() {
                     {book.price.toLocaleString()}원
                   </span>
                   <span className="ml-2 text-sm text-green-600">
-                    ({Math.round(
+                    (
+                    {Math.round(
                       ((book.originalPrice - book.price) / book.originalPrice) *
                         100
-                    )}% 할인)
+                    )}
+                    % 할인)
                   </span>
                 </>
               ) : (
@@ -159,48 +165,49 @@ function BookDetail() {
           </div>
 
           {/* ✅ 구매 / 다운로드 / 크몽 버튼 영역 */}
-          <div className="text-center space-y-3">
-            {book.kmongUrl && (
+          <div className="text-left mt-4">
+            <div className="flex flex-wrap gap-2">
+              {/* 크몽 버튼 */}
               <a
-                href={book.kmongUrl}
+                href={book.kmongUrl || "https://kmong.com"}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded shadow inline-block"
+                className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded shadow"
               >
                 크몽 페이지로 이동
               </a>
-            )}
 
-            {!hasAccess ? (
-              <button
-                onClick={handlePurchase}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow"
-              >
-                홈페이지 결제 진행
-              </button>
-            ) : (
-              <>
+              {/* 구매 or 다운로드 버튼 */}
+              {!hasAccess ? (
+                <button
+                  onClick={handlePurchase}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow"
+                >
+                  홈페이지 결제 진행
+                </button>
+              ) : (
                 <button
                   onClick={handleDownload}
-                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow"
+                  className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow"
                 >
                   다운로드
                 </button>
-                {typeof window !== "undefined" &&
-                  /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && (
-                    <p className="mt-3 text-sm text-gray-500 leading-snug">
-                      모바일에서는 파일이{" "}
-                      <span className="text-blue-600 font-semibold">새 창</span>
-                      으로 열립니다. <br />
-                      열린 창에서{" "}
-                      <span className="text-blue-600 font-semibold">
-                        공유 버튼
-                      </span>
-                      을 눌러 저장하세요 😊
-                    </p>
-                  )}
-              </>
-            )}
+              )}
+            </div>
+
+            {/* 모바일 안내문 (다운로드일 때만) */}
+            {hasAccess &&
+              typeof window !== "undefined" &&
+              /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && (
+                <p className="mt-3 text-sm text-gray-500 leading-snug">
+                  모바일에서는 파일이{" "}
+                  <span className="text-blue-600 font-semibold">새 창</span>으로
+                  열립니다. <br />
+                  열린 창에서{" "}
+                  <span className="text-blue-600 font-semibold">공유 버튼</span>
+                  을 눌러 저장하세요 😊
+                </p>
+              )}
           </div>
 
           {/* 서비스 설명 */}
