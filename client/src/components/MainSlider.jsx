@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -35,30 +36,25 @@ function MainSlider() {
     stopAutoSlide();
     intervalRef.current = setInterval(() => goNext(), 5000);
   };
-
   const stopAutoSlide = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
   };
-
   const goPrev = () => {
     setDirection(-1);
     setIndex((prev) => (prev - 1 + slides.length) % slides.length);
   };
-
   const goNext = () => {
     setDirection(1);
     setIndex((prev) => (prev + 1) % slides.length);
   };
-
   const handleStart = (e) => {
     isDragging.current = true;
     startX.current =
       e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
   };
-
   const handleEnd = (e) => {
     if (!isDragging.current) return;
     const endX =
@@ -70,26 +66,16 @@ function MainSlider() {
   };
 
   const variants = {
-    enter: (dir) => ({
-      x: dir > 0 ? 300 : -300,
-      opacity: 0,
-    }),
-    center: {
-      x: 0,
-      opacity: 1,
-    },
-    exit: (dir) => ({
-      x: dir > 0 ? -300 : 300,
-      opacity: 0,
-    }),
+    enter: (dir) => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir) => ({ x: dir > 0 ? -300 : 300, opacity: 0 }),
   };
 
   if (slides.length === 0) return null;
 
   const slide = slides[index];
-  const imageUrl = slide.image.startsWith("http")
-    ? slide.image
-    : `${API}${slide.image}`;
+  // ★ 이미지 URL을 API가 아닌 클라이언트 퍼블릭 경로로만 사용
+  const imageUrl = slide.image;  
 
   return (
     <div
