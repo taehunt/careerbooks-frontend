@@ -131,10 +131,170 @@ function Admin() {
     <div className="p-6 max-w-5xl mx-auto space-y-8">
       <h1 className="text-3xl font-bold mb-6">관리자 페이지</h1>
 
-      {/* 생략 가능: 전자책 목록, 등록, 수정, 회원관리 UI는 기존 그대로 유지됨 */}
+      {/* 📚 Collapse 영역 */}
+      <section>
+        <button
+          onClick={() => setBookCollapse(!bookCollapse)}
+          className="text-lg font-semibold bg-blue-100 px-4 py-2 rounded w-full text-left mb-4"
+        >
+          📚 전자책 관리 {bookCollapse ? "▲" : "▼"}
+        </button>
 
-      {/* 필요한 경우 여기에 전체 내용 이어서 붙이시면 됩니다 */}
-      {/* 예시: 등록 폼, 목록 테이블, Collapse 섹션 등은 위와 동일하게 유지 */}
+        {bookCollapse && (
+          <div className="space-y-12">
+            {/* 📘 전자책 목록 */}
+            <div>
+              <h2 className="text-xl font-semibold mb-2">📘 전자책 목록</h2>
+              <table className="w-full border text-sm">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="p-2 border">Index</th>
+                    <th className="p-2 border">제목</th>
+                    <th className="p-2 border">Slug</th>
+                    <th className="p-2 border">카테고리</th>
+                    <th className="p-2 border">가격</th>
+                    <th className="p-2 border">정가</th>
+                    <th className="p-2 border">크몽</th>
+                    <th className="p-2 border">관리</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {books.map((book) => (
+                    <tr key={book._id}>
+                      <td className="border p-2">{book.titleIndex}</td>
+                      <td className="border p-2">{book.title}</td>
+                      <td className="border p-2">{book.slug}</td>
+                      <td className="border p-2">{book.category}</td>
+                      <td className="border p-2">{book.price}</td>
+                      <td className="border p-2">{book.originalPrice}</td>
+                      <td className="border p-2">
+                        {book.kmongUrl && (
+                          <a
+                            href={book.kmongUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                          >
+                            링크
+                          </a>
+                        )}
+                      </td>
+                      <td className="border p-2 space-x-2">
+                        <button
+                          onClick={() => deleteBook(book._id)}
+                          className="text-red-600 hover:underline"
+                        >
+                          삭제
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* 📥 전자책 등록 */}
+            <div>
+              <h2 className="text-xl font-semibold mb-2">📥 전자책 등록</h2>
+              <div className="space-y-2">
+                {[
+                  "titleIndex",
+                  "title",
+                  "originalPrice",
+                  "price",
+                  "slug",
+                ].map((key) => (
+                  <input
+                    key={key}
+                    type={
+                      key.includes("Price") || key === "titleIndex"
+                        ? "number"
+                        : "text"
+                    }
+                    placeholder={key}
+                    value={form[key]}
+                    onChange={(e) =>
+                      setForm({ ...form, [key]: e.target.value })
+                    }
+                    className="border p-2 w-full"
+                  />
+                ))}
+                <input
+                  type="text"
+                  placeholder="kmongUrl"
+                  value={form.kmongUrl}
+                  onChange={(e) =>
+                    setForm({ ...form, kmongUrl: e.target.value })
+                  }
+                  className="border p-2 w-full"
+                />
+                <select
+                  value={form.category}
+                  onChange={(e) =>
+                    setForm({ ...form, category: e.target.value })
+                  }
+                  className="border p-2 w-full"
+                >
+                  <option value="frontend">프론트엔드</option>
+                  <option value="backend">백엔드</option>
+                  <option value="design">웹디자인</option>
+                  <option value="planning">웹기획</option>
+                </select>
+                <input
+                  type="file"
+                  onChange={(e) =>
+                    setForm({ ...form, file: e.target.files[0] })
+                  }
+                  className="w-full"
+                />
+                <button
+                  onClick={uploadBook}
+                  className="bg-green-600 text-white px-4 py-2 rounded"
+                >
+                  등록하기
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* 👥 Collapse 영역 */}
+      <section>
+        <button
+          onClick={() => setUserCollapse(!userCollapse)}
+          className="text-lg font-semibold bg-blue-100 px-4 py-2 rounded w-full text-left"
+        >
+          👥 회원 관리 {userCollapse ? "▲" : "▼"}
+        </button>
+
+        {userCollapse && (
+          <div className="mt-4">
+            <table className="w-full border text-sm">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="p-2 border">ID</th>
+                  <th className="p-2 border">닉네임</th>
+                  <th className="p-2 border">권한</th>
+                  <th className="p-2 border">가입일</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((u, i) => (
+                  <tr key={i}>
+                    <td className="border p-2">{u.userId}</td>
+                    <td className="border p-2">{u.nickname}</td>
+                    <td className="border p-2">{u.role || "user"}</td>
+                    <td className="border p-2">
+                      {new Date(u.createdAt).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
