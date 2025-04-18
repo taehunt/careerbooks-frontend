@@ -1,12 +1,9 @@
-// server/server.js
 import express from "express";
-import path from "path";
+import path, { dirname as _dirname } from "path";
+import { fileURLToPath } from "url";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
-import fileUpload from "express-fileupload";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 
@@ -15,24 +12,27 @@ import authRoutes from "./routes/authRoutes.js";
 import bookRoutes from "./routes/bookRoutes.js";
 import downloadRoutes from "./routes/downloadRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import slideRoutes from "./routes/slideRoutes.js";
 
 // Models (for initial setup)
 import User from "./models/User.js";
 import Book from "./models/Book.js";
 
-const envFile = `.env.${process.env.NODE_ENV || "development"}`;
-dotenv.config({ path: envFile });
+dotenv.config({ path: `.env.${process.env.NODE_ENV || "development"}` });
 
 const app = express();
 
+// ESM 환경에서 __dirname 설정
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = _dirname(__filename);
+
+// 1) 클라이언트 public/images 폴더 정적 서빙
 app.use(
   "/images",
   express.static(path.join(__dirname, "../client/public/images"))
 );
-// 2) 슬라이드 전용 라우트 연결
-import slideRoutes from "./routes/slideRoutes.js";
-app.use("/api/admin/slides", slideRoutes);
 
+// 2) CORS 설정
 const allowedOrigins =
   process.env.NODE_ENV === "production"
     ? [
@@ -48,13 +48,11 @@ const allowedOrigins =
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      console.log("🌐 요청 Origin:", origin);
+    origin(origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        console.warn("⛔ CORS 차단된 Origin:", origin);
-        callback(new Error("Not allowed by CORS"));
+        callback(new Error("Not allowed by CORS"), false);
       }
     },
     methods: ["GET", "POST", "PUT", "DELETE"],
@@ -76,26 +74,29 @@ app.use(
   })
 );
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// 3) 슬라이드 전용 라우트 마운트
+app.use("/api/admin/slides", slideRoutes);
+
+// 기존 API 라우트
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/downloads", downloadRoutes);
 
+// 헬스 체크
 app.get("/api/ping", (req, res) => {
   res.send("pong");
 });
 
+// DB 연결 및 초기화
 mongoose
   .connect(process.env.MONGO_URI)
   .then(async () => {
+    // 구매 기록 마이그레이션
     const users = await User.find();
-
     for (const user of users) {
       if (
         user.purchasedBooks.length > 0 &&
@@ -110,6 +111,7 @@ mongoose
       }
     }
 
+    // 기본 데이터 확인
     const bookCount = await Book.countDocuments();
     if (bookCount === 0) {
       // 초기 데이터 삽입 가능
@@ -122,4 +124,6 @@ mongoose
       console.log(`✅ 서버 시작됨: http://localhost:${PORT}`);
     });
   })
-  .catch((err) => console.error("❌ MongoDB 연결 실패:", err));
+  .catch((err) => {
+    console.error("❌ MongoDB 연결 실패:", err);
+  });

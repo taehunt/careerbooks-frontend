@@ -1,7 +1,5 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-// 파일 경로: root/client/src/components/MainSlider.jsx
-
 import { useEffect, useState, useRef } from "react";
+import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
@@ -21,8 +19,8 @@ function MainSlider() {
   useEffect(() => {
     axios
       .get(`${API}/api/admin/slides`)
-      .then(res => setSlides(res.data))
-      .catch(err => {
+      .then((res) => setSlides(res.data))
+      .catch((err) => {
         console.error("슬라이드 불러오기 실패", err);
         setSlides([]);
       });
@@ -37,24 +35,31 @@ function MainSlider() {
     stopAutoSlide();
     intervalRef.current = setInterval(() => goNext(), 5000);
   };
+
   const stopAutoSlide = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
   };
 
   const goPrev = () => {
     setDirection(-1);
-    setIndex(prev => (prev - 1 + slides.length) % slides.length);
-  };
-  const goNext = () => {
-    setDirection(1);
-    setIndex(prev => (prev + 1) % slides.length);
+    setIndex((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
-  const handleStart = e => {
-    isDragging.current = true;
-    startX.current = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
+  const goNext = () => {
+    setDirection(1);
+    setIndex((prev) => (prev + 1) % slides.length);
   };
-  const handleEnd = e => {
+
+  const handleStart = (e) => {
+    isDragging.current = true;
+    startX.current =
+      e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
+  };
+
+  const handleEnd = (e) => {
     if (!isDragging.current) return;
     const endX =
       e.type === "touchend" ? e.changedTouches[0].clientX : e.clientX;
@@ -65,13 +70,26 @@ function MainSlider() {
   };
 
   const variants = {
-    enter: dir => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
-    center: { x: 0, opacity: 1 },
-    exit: dir => ({ x: dir > 0 ? -300 : 300, opacity: 0 }),
+    enter: (dir) => ({
+      x: dir > 0 ? 300 : -300,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (dir) => ({
+      x: dir > 0 ? -300 : 300,
+      opacity: 0,
+    }),
   };
 
   if (slides.length === 0) return null;
-  const slidePath = slides[index];
+
+  const slide = slides[index];
+  const imageUrl = slide.image.startsWith("http")
+    ? slide.image
+    : `${API}${slide.image}`;
 
   return (
     <div
@@ -83,7 +101,6 @@ function MainSlider() {
       onMouseEnter={stopAutoSlide}
       onMouseLeave={startAutoSlide}
     >
-      {/* 이전/다음 버튼 */}
       <button
         onClick={goPrev}
         className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/30 hover:bg-white/50 p-2 rounded-full"
@@ -97,25 +114,55 @@ function MainSlider() {
         <ChevronRight className="w-6 h-6 text-white" />
       </button>
 
-      {/* 슬라이드 이미지 */}
       <AnimatePresence initial={false} custom={direction}>
-        <motion.img
-          key={slidePath}
-          src={`${API}${slidePath}`}
+        <motion.div
+          key={index}
           custom={direction}
           variants={variants}
           initial="enter"
           animate="center"
           exit="exit"
           transition={{ duration: 0.6, ease: "easeInOut" }}
-          className="absolute w-full h-full object-cover"
-        />
+          className="absolute w-full h-full bg-center bg-cover z-10"
+          style={{ backgroundImage: `url(${imageUrl})` }}
+        >
+          <div className="absolute inset-0 bg-black/60 z-0" />
+          <div
+            className="relative z-20 flex flex-col items-center justify-center h-full px-4 text-white"
+            style={{ textAlign: slide.textAlign || "center" }}
+          >
+            <h1
+              className="font-bold mb-4"
+              style={{ fontSize: slide.fontSize || "40px" }}
+            >
+              {slide.title}
+            </h1>
+            <p className="text-lg sm:text-xl mb-6">{slide.subtitle}</p>
+            <div className="flex gap-4">
+              {slide.button1 && slide.button1Url && (
+                <Link
+                  to={slide.button1Url}
+                  className="bg-white text-blue-600 font-semibold px-6 py-3 rounded-lg shadow hover:bg-white/50 transition"
+                >
+                  {slide.button1}
+                </Link>
+              )}
+              {slide.button2 && slide.button2Url && (
+                <Link
+                  to={slide.button2Url}
+                  className="bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow hover:bg-blue-800 transition"
+                >
+                  {slide.button2}
+                </Link>
+              )}
+            </div>
+          </div>
+        </motion.div>
       </AnimatePresence>
 
-      {/* 인디케이터 */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
         {slides.map((_, i) => (
-          <span
+          <div
             key={i}
             onClick={() => {
               setDirection(i > index ? 1 : -1);
