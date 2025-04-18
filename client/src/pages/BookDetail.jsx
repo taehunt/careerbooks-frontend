@@ -6,7 +6,7 @@ import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import { AuthContext } from "../context/AuthContext";
 
-axios.defaults.withCredentials = true;  // ★ 추가된 부분
+axios.defaults.withCredentials = true;
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const UPLOADS = import.meta.env.VITE_UPLOADS_URL;
@@ -122,11 +122,11 @@ function BookDetail() {
         </p>
       ) : book ? (
         <>
-          {/* ...상단 브레드크럼, 책 정보, 구매/다운로드 버튼, 설명 영역 생략... */}
+          {/* ...상단 정보/구매 버튼/서비스 설명 부분은 기존과 동일... */}
 
-          {/* 미리보기 이미지 */}
+          {/* 미리보기 이미지 섹션 */}
           <div className="mb-10">
-            <h3 className="text-xl font-semibold text-gray-800 mb-3 border-l-4 border-green-500 pl-4 flex justify-between items-center">
+            <h3 className="flex justify-between items-center text-xl font-semibold text-gray-800 mb-3 border-l-4 border-green-500 pl-4">
               <span>📖 미리보기 이미지</span>
               <button
                 onClick={() => setShowPreview(!showPreview)}
@@ -135,7 +135,6 @@ function BookDetail() {
                 {showPreview ? "닫기 ▲" : "열기 ▼"}
               </button>
             </h3>
-
             {showPreview && (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 {Array.from({ length: 5 }).map((_, idx) => (
