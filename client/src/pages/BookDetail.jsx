@@ -166,9 +166,9 @@ function BookDetail() {
             </div>
           </div>
 
-          {/* 구매 / 다운로드 버튼 */}
-          <div className="text-center space-y-4">
-            {/* ✅ 크몽 버튼은 항상 보여줌 */}
+          {/* ✅ 구매 / 다운로드 / 크몽 버튼 영역 */}
+          <div className="text-center space-y-3">
+            {/* ✅ 크몽 버튼은 항상 표시 */}
             {book.kmongUrl && (
               <a
                 href={book.kmongUrl}
@@ -180,8 +180,8 @@ function BookDetail() {
               </a>
             )}
 
+            {/* ✅ 구매 여부에 따라 버튼 변경 */}
             {!hasAccess ? (
-              // 🔒 아직 구매하지 않은 경우 → 홈페이지 결제 버튼 표시
               <button
                 onClick={handlePurchase}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow"
@@ -189,7 +189,6 @@ function BookDetail() {
                 홈페이지 결제 진행
               </button>
             ) : (
-              // ✅ 구매 완료된 경우 → 다운로드 버튼 표시
               <>
                 <button
                   onClick={handleDownload}
@@ -197,14 +196,12 @@ function BookDetail() {
                 >
                   다운로드
                 </button>
-                {/* 모바일 안내문 */}
                 {typeof window !== "undefined" &&
                   /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && (
                     <p className="mt-3 text-sm text-gray-500 leading-snug">
                       모바일에서는 파일이{" "}
                       <span className="text-blue-600 font-semibold">새 창</span>
-                      으로 열립니다.
-                      <br />
+                      으로 열립니다. <br />
                       열린 창에서{" "}
                       <span className="text-blue-600 font-semibold">
                         공유 버튼
