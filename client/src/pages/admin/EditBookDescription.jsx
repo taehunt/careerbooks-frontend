@@ -32,10 +32,10 @@ function EditBookDescription() {
   }, [selectedSlug]);
 
   const handleSave = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return alert("로그인 필요");
+    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+    if (!token) return alert("로그인 필요");
 
+    try {
       await axios.put(
         `${API}/api/books/${selectedSlug}/description`,
         { description },
@@ -78,13 +78,10 @@ function EditBookDescription() {
             <p className="text-center text-gray-500">불러오는 중...</p>
           ) : (
             <>
-			
               <MdEditor
                 value={description}
                 renderHTML={(text) => mdParser.render(text)}
-                onChange={({ text }) => {
-                  setDescription(text); // 꼭 text! html 아님!
-                }}
+                onChange={({ text }) => setDescription(text)}
               />
               <div className="text-right mt-4">
                 <button
