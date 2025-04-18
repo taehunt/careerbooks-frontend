@@ -211,7 +211,7 @@ function BookDetail() {
           </div>
 
           {/* 서비스 설명 */}
-          <div className="mb-10">
+          <div className="mt-10 mb-10">
             <h3 className="text-xl font-semibold text-gray-800 mb-3 border-l-4 border-blue-500 pl-4">
               💡 서비스 설명
             </h3>
