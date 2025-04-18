@@ -7,7 +7,7 @@ const API = import.meta.env.VITE_API_BASE_URL;
 
 function Admin() {
   const navigate = useNavigate();
-  const { user, logout, isAuthChecked } = useContext(AuthContext); // ✅ isAuthChecked 추가
+  const { user, logout, isAuthChecked } = useContext(AuthContext);
 
   const [books, setBooks] = useState([]);
   const [users, setUsers] = useState([]);
@@ -28,13 +28,14 @@ function Admin() {
   const [userCollapse, setUserCollapse] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    // ✅ 인증 확인 완료 전엔 아무 것도 안함
     if (!isAuthChecked) return;
+
+    const token =
+      sessionStorage.getItem("token") || localStorage.getItem("token");
 
     if (!token || !user || user.role !== "admin") {
       alert("관리자만 접근할 수 있습니다.");
+      logout();
       navigate("/login");
       return;
     }
@@ -48,9 +49,7 @@ function Admin() {
 
     axios
       .get(`${API}/api/admin/users`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
         const result = Array.isArray(res.data)
@@ -64,7 +63,7 @@ function Admin() {
         logout();
         navigate("/login");
       });
-  }, [user, isAuthChecked]);
+  }, [user, isAuthChecked, logout, navigate]);
 
   const refreshBooks = async () => {
     const res = await axios.get(`${API}/api/books`);
@@ -120,11 +119,10 @@ function Admin() {
     }
   };
 
-  // ✅ 인증 정보 확인 중일 때 로딩 표시
   if (!isAuthChecked) {
     return (
-      <div className="flex justify-center items-center h-screen text-gray-600">
-        관리자 인증 확인 중...
+      <div className="text-center mt-10 text-gray-500">
+        로그인 상태 확인 중입니다...
       </div>
     );
   }
@@ -133,8 +131,10 @@ function Admin() {
     <div className="p-6 max-w-5xl mx-auto space-y-8">
       <h1 className="text-3xl font-bold mb-6">관리자 페이지</h1>
 
-      {/* 나머지 기존 코드 동일 */}
-      {/* ... */}
+      {/* 생략 가능: 전자책 목록, 등록, 수정, 회원관리 UI는 기존 그대로 유지됨 */}
+
+      {/* 필요한 경우 여기에 전체 내용 이어서 붙이시면 됩니다 */}
+      {/* 예시: 등록 폼, 목록 테이블, Collapse 섹션 등은 위와 동일하게 유지 */}
     </div>
   );
 }

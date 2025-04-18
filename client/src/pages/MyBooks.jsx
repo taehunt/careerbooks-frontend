@@ -6,12 +6,15 @@ const API = import.meta.env.VITE_API_BASE_URL;
 
 function MyBooks() {
   const navigate = useNavigate();
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, isAuthChecked } = useContext(AuthContext); // ✅ isAuthChecked 추가
   const [books, setBooks] = useState([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    if (!isAuthChecked) return; // ✅ 인증 확인 전에는 대기
+
+    const token =
+      sessionStorage.getItem("token") || localStorage.getItem("token");
 
     // ✅ user 정보까지 체크해서 인증 만료 방지
     if (!token || !user) {
@@ -43,9 +46,11 @@ function MyBooks() {
         logout();
         localStorage.removeItem("token");
         localStorage.removeItem("user");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("user");
         navigate("/login");
       });
-  }, [navigate, logout, user]);
+  }, [navigate, logout, user, isAuthChecked]);
 
   const isDownloadable = (purchasedAt) => {
     const deadline = new Date(purchasedAt);
@@ -61,7 +66,8 @@ function MyBooks() {
   };
 
   const handleDownload = (slug) => {
-    const token = localStorage.getItem("token");
+    const token =
+      sessionStorage.getItem("token") || localStorage.getItem("token");
     const downloadUrl = `${API}/api/downloads/${slug}`;
 
     const a = document.createElement("a");
@@ -72,6 +78,14 @@ function MyBooks() {
     a.click();
     document.body.removeChild(a);
   };
+
+  if (!isAuthChecked) {
+    return (
+      <div className="text-center mt-10 text-gray-500">
+        로그인 상태 확인 중입니다...
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto mt-10">
