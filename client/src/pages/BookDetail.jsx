@@ -49,6 +49,7 @@ function BookDetail() {
       setHasAccess(false);
       return;
     }
+
     axios
       .get(`${API}/api/books/${slug}/access`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -57,28 +58,20 @@ function BookDetail() {
       .catch(() => setHasAccess(false));
   }, [slug]);
 
-  const handleDownload = async () => {
+  // 다운로드 버튼 클릭 시, 토큰을 쿼리 파라미터로 전달하여 a 태그로 직접 다운로드
+  const handleDownload = () => {
     const token =
       sessionStorage.getItem("token") || localStorage.getItem("token");
     if (!token) {
       alert("로그인이 필요합니다.");
       return;
     }
-    try {
-      const response = await axios.get(`${API}/api/downloads/${slug}`, {
-        responseType: "blob",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `${slug}.zip`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch {
-      alert("다운로드 실패");
-    }
+    const a = document.createElement("a");
+    a.href = `${API}/api/downloads/${slug}?token=${token}`;
+    a.setAttribute("download", `${slug}.zip`);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   const handlePurchase = async () => {
@@ -251,7 +244,7 @@ function BookDetail() {
                     key={idx}
                     src={`${UPLOADS}/${slug}_preview0${idx + 1}.png`}
                     alt={`미리보기 ${idx + 1}`}
-                    className="w-full border rounded shadow-hover-lg transition cursor-pointer"
+                    className="w-full border rounded shadow cursor-pointer"
                     onClick={() => setActivePreview(idx)}
                   />
                 ))}
@@ -266,8 +259,8 @@ function BookDetail() {
             >
               <img
                 src={`${UPLOADS}/${slug}_preview0${activePreview + 1}.png`}
-                alt={`미리보기 확대 ${activePreview + 1}`}
-                className="max-w-full max-h-full rounded-lg shadow-lg"
+                alt={`확대 미리보기 ${activePreview + 1}`}
+                className="max-w-full max-h-full rounded-lg"
               />
             </div>
           )}

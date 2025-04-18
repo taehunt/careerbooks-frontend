@@ -1,3 +1,5 @@
+// root/server/server.js
+
 import express from "express";
 import path, { dirname as _dirname } from "path";
 import { fileURLToPath } from "url";
@@ -14,7 +16,7 @@ import downloadRoutes from "./routes/downloadRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import slideRoutes from "./routes/slideRoutes.js";
 
-// Models (for initial setup)
+// Models
 import User from "./models/User.js";
 import Book from "./models/Book.js";
 
@@ -35,27 +37,20 @@ app.use(
 // 2) CORS 설정
 const allowedOrigins =
   process.env.NODE_ENV === "production"
-    ? [
-        "https://careerbooks.shop",
-        "http://careerbooks.shop",
-        "https://www.careerbooks.shop",
-        "http://www.careerbooks.shop",
-        "https://api.careerbooks.shop",
-        "https://careerbooks-frontend.onrender.com",
-        "https://careerbooks-server.onrender.com",
-      ]
+    ? ["https://careerbooks.shop", "https://www.careerbooks.shop"]
     : ["http://localhost:5173"];
 
 app.use(
   cors({
-    origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"), false);
-      }
-    },
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Origin",
+      "X-Requested-With",
+      "Content-Type",
+      "Accept",
+      "Authorization",
+    ],
     credentials: true,
   })
 );
@@ -77,7 +72,7 @@ app.use(
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// 3) 슬라이드 전용 라우트 마운트
+// 3) 슬라이드 전용 라우트
 app.use("/api/admin/slides", slideRoutes);
 
 // 기존 API 라우트
@@ -91,7 +86,7 @@ app.get("/api/ping", (req, res) => {
   res.send("pong");
 });
 
-// DB 연결 및 초기화
+// DB 연결 및 서버 시작
 mongoose
   .connect(process.env.MONGO_URI)
   .then(async () => {
@@ -111,7 +106,7 @@ mongoose
       }
     }
 
-    // 기본 데이터 확인
+    // 책 데이터 확인
     const bookCount = await Book.countDocuments();
     if (bookCount === 0) {
       // 초기 데이터 삽입 가능
