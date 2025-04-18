@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
+import { AuthContext } from "../context/AuthContext"; // ✅ AuthContext 추가
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const UPLOADS = import.meta.env.VITE_UPLOADS_URL;
@@ -11,12 +12,14 @@ const UPLOADS = import.meta.env.VITE_UPLOADS_URL;
 function BookDetail() {
   const navigate = useNavigate();
   const { slug } = useParams();
+  const { user, isAuthChecked } = useContext(AuthContext); // ✅ 인증 확인
+
   const [book, setBook] = useState(null);
   const [hasAccess, setHasAccess] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [customDescription, setCustomDescription] = useState("");
-  const [purchaseMethod, setPurchaseMethod] = useState("site"); // "site" or "kmong"
+  const [purchaseMethod, setPurchaseMethod] = useState("site");
 
   useEffect(() => {
     if (slug) {
@@ -39,42 +42,41 @@ function BookDetail() {
   }, [slug]);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
     if (!token) {
       setHasAccess(false);
       return;
     }
+
     axios
       .get(`${API}/api/books/${slug}/access`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setHasAccess(res.data.allowed))
-      .catch((err) => {
-        console.error(err);
-        setHasAccess(false);
-      });
+      .catch(() => setHasAccess(false));
   }, [slug]);
 
   const handleDownload = () => {
-    const token = localStorage.getItem("token");
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
     if (!token) {
       alert("로그인이 필요합니다.");
       return;
     }
 
-    const downloadUrl = `${API}/api/downloads/${slug}`;
-
     const a = document.createElement("a");
-    a.href = downloadUrl;
+    a.href = `${API}/api/downloads/${slug}`;
     a.target = "_blank";
     a.rel = "noopener noreferrer";
-    document.body.appendChild(a); // ✅ 안정성 확보
+    document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a); // ✅ 메모리 정리
+    document.body.removeChild(a);
   };
 
   const handlePurchase = async () => {
-    const token = localStorage.getItem("token");
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
     if (!token) {
       alert("로그인이 필요합니다. 로그인 후 다시 시도해주세요.");
       navigate("/login");
@@ -84,9 +86,7 @@ function BookDetail() {
       await axios.post(
         `${API}/api/books/${slug}/purchase`,
         {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       alert("구매 완료");
       setHasAccess(true);
@@ -103,6 +103,15 @@ function BookDetail() {
     designer: "웹디자인",
   };
 
+  // ✅ 인증 확인 전엔 아무것도 안 보여줌
+  if (!isAuthChecked) {
+    return (
+      <div className="text-center mt-10 text-gray-500">
+        로그인 상태 확인 중입니다...
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-3xl mx-auto">
       {notFound ? (
@@ -112,13 +121,9 @@ function BookDetail() {
       ) : book ? (
         <>
           <div className="text-sm text-blue-600 mb-2 space-x-1">
-            <Link to="/" className="hover:underline">
-              홈
-            </Link>
+            <Link to="/" className="hover:underline">홈</Link>
             <span>&gt;</span>
-            <Link to="/books" className="hover:underline">
-              전자책 목록
-            </Link>
+            <Link to="/books" className="hover:underline">전자책 목록</Link>
             <span>&gt;</span>
             <Link
               to={`/books?category=${book.category}`}
@@ -143,12 +148,9 @@ function BookDetail() {
                     {book.price.toLocaleString()}원
                   </span>
                   <span className="ml-2 text-sm text-green-600">
-                    (
-                    {Math.round(
-                      ((book.originalPrice - book.price) / book.originalPrice) *
-                        100
-                    )}
-                    % 할인)
+                    ({Math.round(
+                      ((book.originalPrice - book.price) / book.originalPrice) * 100
+                    )}% 할인)
                   </span>
                 </>
               ) : (
@@ -157,7 +159,7 @@ function BookDetail() {
             </div>
           </div>
 
-          {/* 구매 버튼 + 토글 */}
+          {/* 구매 / 다운로드 버튼 */}
           <div className="text-center">
             {!hasAccess ? (
               <>
@@ -183,7 +185,6 @@ function BookDetail() {
                     크몽 구매
                   </button>
                 </div>
-
                 {purchaseMethod === "site" ? (
                   <button
                     onClick={handlePurchase}
@@ -210,17 +211,12 @@ function BookDetail() {
                 >
                   다운로드
                 </button>
-                {/* 📱 모바일 안내문 */}
                 {typeof window !== "undefined" &&
                   /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && (
                     <p className="mt-3 text-sm text-gray-500 leading-snug">
-                      모바일에서는 파일이{" "}
-                      <span className="text-blue-600 font-semibold">새 창</span>
+                      모바일에서는 파일이 <span className="text-blue-600 font-semibold">새 창</span>
                       으로 열립니다. <br />
-                      열린 창에서{" "}
-                      <span className="text-blue-600 font-semibold">
-                        공유 버튼
-                      </span>
+                      열린 창에서 <span className="text-blue-600 font-semibold">공유 버튼</span>
                       을 눌러 저장하세요 😊
                     </p>
                   )}
@@ -234,7 +230,7 @@ function BookDetail() {
             </h3>
             <div className="text-sm text-gray-800 leading-relaxed space-y-4 whitespace-pre-wrap break-words">
               <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
+                remarkPlugins={[remarkGfm, remarkBreaks]}
                 components={{
                   p: ({ node, ...props }) => <p className="mb-2" {...props} />,
                   li: ({ node, ...props }) => (
@@ -257,7 +253,6 @@ function BookDetail() {
                 {showPreview ? "닫기 ▲" : "열기 ▼"}
               </button>
             </h3>
-
             <div
               className={`grid gap-4 transition-all duration-500 overflow-hidden ${
                 showPreview ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"

@@ -8,7 +8,7 @@ const API = import.meta.env.VITE_API_BASE_URL;
 function Login() {
   const [form, setForm] = useState({ userId: "", password: "" });
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext); // ✅ setUser → login 사용
+  const { login } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,10 +16,16 @@ function Login() {
       const res = await axios.post(`${API}/api/auth/login`, form);
       const { user, token } = res.data;
 
-      login(user, token); // ✅ 역할 따라 localStorage or sessionStorage 자동 적용
+      login(user, token); // ✅ 관리자 → sessionStorage / 유저 → localStorage 저장
 
       alert("로그인 성공 :)");
-      navigate("/");
+
+      // ✅ 역할 따라 자동 리다이렉션
+      if (user.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/my-books");
+      }
     } catch (err) {
       alert(err.response?.data?.message || "로그인 실패 :(");
       console.error(err);

@@ -1,4 +1,3 @@
-// App.jsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
@@ -25,6 +24,17 @@ import AdminRoute from "./components/AdminRoute";
 import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
+  const { isAuthChecked } = useContext(AuthContext);
+
+  // ✅ 인증 확인 완료되기 전까지 렌더링 막기
+  if (!isAuthChecked) {
+    return (
+      <div className="flex justify-center items-center min-h-screen text-gray-600">
+        인증 확인 중...
+      </div>
+    );
+  }
+
   return (
     <>
       <ScrollToTop />
