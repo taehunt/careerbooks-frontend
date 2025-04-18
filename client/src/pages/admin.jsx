@@ -161,14 +161,110 @@ function Admin() {
                 <tbody>
                   {books.map((book) => (
                     <tr key={book._id}>
-                      <td className="border p-2">{book.titleIndex}</td>
-                      <td className="border p-2">{book.title}</td>
-                      <td className="border p-2">{book.slug}</td>
-                      <td className="border p-2">{book.category}</td>
-                      <td className="border p-2">{book.price}</td>
-                      <td className="border p-2">{book.originalPrice}</td>
                       <td className="border p-2">
-                        {book.kmongUrl && (
+                        {editRowId === book._id ? (
+                          <input
+                            type="number"
+                            value={editForm.titleIndex}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                titleIndex: e.target.value,
+                              })
+                            }
+                            className="w-16 border px-1"
+                          />
+                        ) : (
+                          book.titleIndex
+                        )}
+                      </td>
+                      <td className="border p-2">
+                        {editRowId === book._id ? (
+                          <input
+                            type="text"
+                            value={editForm.title}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                title: e.target.value,
+                              })
+                            }
+                            className="w-full border px-1"
+                          />
+                        ) : (
+                          book.title
+                        )}
+                      </td>
+                      <td className="border p-2">{book.slug}</td>
+                      <td className="border p-2">
+                        {editRowId === book._id ? (
+                          <select
+                            value={editForm.category}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                category: e.target.value,
+                              })
+                            }
+                            className="border px-1"
+                          >
+                            <option value="frontend">프론트엔드</option>
+                            <option value="backend">백엔드</option>
+                            <option value="design">웹디자인</option>
+                            <option value="planning">웹기획</option>
+                          </select>
+                        ) : (
+                          book.category
+                        )}
+                      </td>
+                      <td className="border p-2">
+                        {editRowId === book._id ? (
+                          <input
+                            type="number"
+                            value={editForm.price}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                price: e.target.value,
+                              })
+                            }
+                            className="w-20 border px-1"
+                          />
+                        ) : (
+                          book.price
+                        )}
+                      </td>
+                      <td className="border p-2">
+                        {editRowId === book._id ? (
+                          <input
+                            type="number"
+                            value={editForm.originalPrice}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                originalPrice: e.target.value,
+                              })
+                            }
+                            className="w-20 border px-1"
+                          />
+                        ) : (
+                          book.originalPrice
+                        )}
+                      </td>
+                      <td className="border p-2">
+                        {editRowId === book._id ? (
+                          <input
+                            type="text"
+                            value={editForm.kmongUrl}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                kmongUrl: e.target.value,
+                              })
+                            }
+                            className="w-full border px-1"
+                          />
+                        ) : book.kmongUrl ? (
                           <a
                             href={book.kmongUrl}
                             target="_blank"
@@ -177,15 +273,59 @@ function Admin() {
                           >
                             링크
                           </a>
-                        )}
+                        ) : null}
                       </td>
                       <td className="border p-2 space-x-2">
-                        <button
-                          onClick={() => deleteBook(book._id)}
-                          className="text-red-600 hover:underline"
-                        >
-                          삭제
-                        </button>
+                        {editRowId === book._id ? (
+                          <>
+                            <button
+                              onClick={() => saveEdit(book._id)}
+                              className="text-green-600 hover:underline"
+                            >
+                              저장
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditRowId(null);
+                                setEditForm({});
+                              }}
+                              className="text-gray-600 hover:underline"
+                            >
+                              취소
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => {
+                                setEditRowId(book._id);
+                                setEditForm({
+                                  title: book.title,
+                                  titleIndex: book.titleIndex,
+                                  category: book.category,
+                                  price: book.price,
+                                  originalPrice: book.originalPrice,
+                                  kmongUrl: book.kmongUrl || "",
+                                });
+                              }}
+                              className="text-green-600 hover:underline"
+                            >
+                              수정
+                            </button>
+                            <Link
+                              to={`/admin/books/edit?slug=${book.slug}`}
+                              className="text-blue-600 hover:underline"
+                            >
+                              설명 수정
+                            </Link>
+                            <button
+                              onClick={() => deleteBook(book._id)}
+                              className="text-red-600 hover:underline"
+                            >
+                              삭제
+                            </button>
+                          </>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -193,32 +333,42 @@ function Admin() {
               </table>
             </div>
 
+            {/* 📝 설명 수정 바로가기 */}
+            <div>
+              <h2 className="text-xl font-semibold mb-2">📝 전자책 설명 수정</h2>
+              <p className="mb-4 text-gray-600">
+                각 전자책의 서비스 설명(마크다운)을 수정하려면 아래 버튼을 눌러 이동하세요.
+              </p>
+              <Link
+                to="/admin/books/edit"
+                className="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
+              >
+                설명 수정 페이지로 이동
+              </Link>
+            </div>
+
             {/* 📥 전자책 등록 */}
             <div>
               <h2 className="text-xl font-semibold mb-2">📥 전자책 등록</h2>
               <div className="space-y-2">
-                {[
-                  "titleIndex",
-                  "title",
-                  "originalPrice",
-                  "price",
-                  "slug",
-                ].map((key) => (
-                  <input
-                    key={key}
-                    type={
-                      key.includes("Price") || key === "titleIndex"
-                        ? "number"
-                        : "text"
-                    }
-                    placeholder={key}
-                    value={form[key]}
-                    onChange={(e) =>
-                      setForm({ ...form, [key]: e.target.value })
-                    }
-                    className="border p-2 w-full"
-                  />
-                ))}
+                {["titleIndex", "title", "originalPrice", "price", "slug"].map(
+                  (key) => (
+                    <input
+                      key={key}
+                      type={
+                        key.includes("Price") || key === "titleIndex"
+                          ? "number"
+                          : "text"
+                      }
+                      placeholder={key}
+                      value={form[key]}
+                      onChange={(e) =>
+                        setForm({ ...form, [key]: e.target.value })
+                      }
+                      className="border p-2 w-full"
+                    />
+                  )
+                )}
                 <input
                   type="text"
                   placeholder="kmongUrl"
