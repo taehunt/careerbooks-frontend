@@ -4,7 +4,7 @@ import axios from "axios";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
-import { AuthContext } from "../context/AuthContext"; // ✅ AuthContext 추가
+import { AuthContext } from "../context/AuthContext";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const UPLOADS = import.meta.env.VITE_UPLOADS_URL;
@@ -12,14 +12,13 @@ const UPLOADS = import.meta.env.VITE_UPLOADS_URL;
 function BookDetail() {
   const navigate = useNavigate();
   const { slug } = useParams();
-  const { user, isAuthChecked } = useContext(AuthContext); // ✅ 인증 확인
+  const { user, isAuthChecked } = useContext(AuthContext);
 
   const [book, setBook] = useState(null);
   const [hasAccess, setHasAccess] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [customDescription, setCustomDescription] = useState("");
-  const [purchaseMethod, setPurchaseMethod] = useState("site");
 
   useEffect(() => {
     if (slug) {
@@ -103,7 +102,6 @@ function BookDetail() {
     designer: "웹디자인",
   };
 
-  // ✅ 인증 확인 전엔 아무것도 안 보여줌
   if (!isAuthChecked) {
     return (
       <div className="text-center mt-10 text-gray-500">
@@ -121,13 +119,9 @@ function BookDetail() {
       ) : book ? (
         <>
           <div className="text-sm text-blue-600 mb-2 space-x-1">
-            <Link to="/" className="hover:underline">
-              홈
-            </Link>
+            <Link to="/" className="hover:underline">홈</Link>
             <span>&gt;</span>
-            <Link to="/books" className="hover:underline">
-              전자책 목록
-            </Link>
+            <Link to="/books" className="hover:underline">전자책 목록</Link>
             <span>&gt;</span>
             <Link
               to={`/books?category=${book.category}`}
@@ -152,12 +146,10 @@ function BookDetail() {
                     {book.price.toLocaleString()}원
                   </span>
                   <span className="ml-2 text-sm text-green-600">
-                    (
-                    {Math.round(
+                    ({Math.round(
                       ((book.originalPrice - book.price) / book.originalPrice) *
                         100
-                    )}
-                    % 할인)
+                    )}% 할인)
                   </span>
                 </>
               ) : (
@@ -168,7 +160,6 @@ function BookDetail() {
 
           {/* ✅ 구매 / 다운로드 / 크몽 버튼 영역 */}
           <div className="text-center space-y-3">
-            {/* ✅ 크몽 버튼은 항상 표시 */}
             {book.kmongUrl && (
               <a
                 href={book.kmongUrl}
@@ -180,7 +171,6 @@ function BookDetail() {
               </a>
             )}
 
-            {/* ✅ 구매 여부에 따라 버튼 변경 */}
             {!hasAccess ? (
               <button
                 onClick={handlePurchase}
@@ -213,6 +203,7 @@ function BookDetail() {
             )}
           </div>
 
+          {/* 서비스 설명 */}
           <div className="mb-10">
             <h3 className="text-xl font-semibold text-gray-800 mb-3 border-l-4 border-blue-500 pl-4">
               💡 서비스 설명
@@ -232,6 +223,7 @@ function BookDetail() {
             </div>
           </div>
 
+          {/* 미리보기 이미지 */}
           <div className="mb-10">
             <h3 className="text-xl font-semibold text-gray-800 mb-3 border-l-4 border-green-500 pl-4 flex justify-between items-center">
               <span>📖 미리보기 이미지</span>
