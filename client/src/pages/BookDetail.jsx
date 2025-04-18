@@ -1,3 +1,5 @@
+// 파일 경로: root/client/src/pages/BookDetail.jsx
+
 import { useEffect, useState, useContext } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -20,6 +22,7 @@ function BookDetail() {
   const [hasAccess, setHasAccess] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [activePreview, setActivePreview] = useState(null);
   const [customDescription, setCustomDescription] = useState("");
 
   useEffect(() => {
@@ -46,7 +49,6 @@ function BookDetail() {
       setHasAccess(false);
       return;
     }
-
     axios
       .get(`${API}/api/books/${slug}/access`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -124,11 +126,18 @@ function BookDetail() {
       ) : book ? (
         <>
           <div className="text-sm text-blue-600 mb-2 space-x-1">
-            <Link to="/" className="hover:underline">홈</Link>
+            <Link to="/" className="hover:underline">
+              홈
+            </Link>
             <span>&gt;</span>
-            <Link to="/books" className="hover:underline">전자책 목록</Link>
+            <Link to="/books" className="hover:underline">
+              전자책 목록
+            </Link>
             <span>&gt;</span>
-            <Link to={`/books?category=${book.category}`} className="hover:underline">
+            <Link
+              to={`/books?category=${book.category}`}
+              className="hover:underline"
+            >
               {categoryLabels[book.category] || book.category}
             </Link>
           </div>
@@ -148,7 +157,13 @@ function BookDetail() {
                     {book.price.toLocaleString()}원
                   </span>
                   <span className="ml-2 text-sm text-green-600">
-                    ({Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)}% 할인)
+                    (
+                    {Math.round(
+                      ((book.originalPrice - book.price) /
+                        book.originalPrice) *
+                        100
+                    )}
+                    % 할인)
                   </span>
                 </>
               ) : (
@@ -187,10 +202,17 @@ function BookDetail() {
               typeof window !== "undefined" &&
               /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && (
                 <p className="mt-3 text-sm text-gray-500 leading-snug">
-                  모바일에서는 파일이 <span className="text-blue-600 font-semibold">새 창</span>으로 열립니다.<br />
-                  열린 창에서 <span className="text-blue-600 font-semibold">공유 버튼</span>을 눌러 저장하세요 😊
+                  모바일에서는 파일이{" "}
+                  <span className="text-blue-600 font-semibold">새 창</span>으로
+                  열립니다.
+                  <br />
+                  열린 창에서{" "}
+                  <span className="text-blue-600 font-semibold">
+                    공유 버튼
+                  </span>
+                  을 눌러 저장하세요 😊
                 </p>
-            )}
+              )}
           </div>
 
           <div className="mt-10 mb-10">
@@ -202,7 +224,9 @@ function BookDetail() {
                 remarkPlugins={[remarkGfm, remarkBreaks]}
                 components={{
                   p: ({ node, ...props }) => <p className="mb-2" {...props} />,
-                  li: ({ node, ...props }) => <li className="list-disc ml-5" {...props} />,
+                  li: ({ node, ...props }) => (
+                    <li className="list-disc ml-5" {...props} />
+                  ),
                 }}
               >
                 {customDescription}
@@ -220,7 +244,6 @@ function BookDetail() {
                 {showPreview ? "닫기 ▲" : "열기 ▼"}
               </button>
             </h3>
-
             {showPreview && (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 {Array.from({ length: 5 }).map((_, idx) => (
@@ -228,12 +251,26 @@ function BookDetail() {
                     key={idx}
                     src={`${UPLOADS}/${slug}_preview0${idx + 1}.png`}
                     alt={`미리보기 ${idx + 1}`}
-                    className="w-full border rounded shadow hover:shadow-lg transition"
+                    className="w-full border rounded shadow-hover-lg transition cursor-pointer"
+                    onClick={() => setActivePreview(idx)}
                   />
                 ))}
               </div>
             )}
           </div>
+
+          {activePreview !== null && (
+            <div
+              className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+              onClick={() => setActivePreview(null)}
+            >
+              <img
+                src={`${UPLOADS}/${slug}_preview0${activePreview + 1}.png`}
+                alt={`미리보기 확대 ${activePreview + 1}`}
+                className="max-w-full max-h-full rounded-lg shadow-lg"
+              />
+            </div>
+          )}
         </>
       ) : (
         <p className="text-center mt-10">책 정보를 불러오는 중입니다...</p>
