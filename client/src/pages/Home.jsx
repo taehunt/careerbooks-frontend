@@ -110,8 +110,8 @@ function Home() {
         </div>
       </div>
 
-      {/* ✅ 무료 전자책 섹션 */}
-      <div className="bg-white border rounded-xl shadow p-6 text-center hover:shadow-lg transition">
+      {/* ✅ 무료 전자책 섹션 (PC용) */}
+      <div className="hidden md:block bg-white border rounded-xl shadow p-6 text-center hover:shadow-lg transition">
         <p className="text-lg text-gray-700 mb-4">
           프론트엔드 개발 비전공자를 위한 입문서! 아래 버튼을 눌러 무료 전자책을
           받아보세요.
@@ -127,6 +127,24 @@ function Home() {
             document.body.removeChild(a);
           }}
           className="inline-block text-white bg-green-500 hover:bg-green-600 px-6 py-3 rounded-lg font-semibold transition transform hover:scale-105"
+        >
+          무료 전자책 받기
+        </button>
+      </div>
+
+      {/* ✅ 무료 전자책 섹션 (모바일용) */}
+      <div className="block md:hidden bg-white border rounded-xl shadow p-4 text-center hover:shadow-lg transition">
+        <button
+          onClick={() => {
+            const a = document.createElement("a");
+            a.href = `${API}/api/downloads/frontend00`;
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          }}
+          className="w-full text-white bg-green-500 hover:bg-green-600 px-4 py-3 rounded-lg font-semibold transition"
         >
           무료 전자책 받기
         </button>
