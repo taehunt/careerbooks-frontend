@@ -1,3 +1,8 @@
+// 파일 경로: root/client/src/App.jsx
+
+import axios from "axios";
+axios.defaults.withCredentials = true;
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
@@ -26,7 +31,6 @@ import ScrollToTop from "./components/ScrollToTop";
 function App() {
   const { isAuthChecked } = useContext(AuthContext);
 
-  // ✅ 인증 확인 완료되기 전까지 렌더링 막기
   if (!isAuthChecked) {
     return (
       <div className="flex justify-center items-center min-h-screen text-gray-600">
@@ -49,7 +53,7 @@ function App() {
 
           {/* 인증 필요 */}
           <Route
-            path="/mybooks"
+            path="/my-books"
             element={
               <RequireAuth>
                 <MyBooks />
@@ -94,6 +98,8 @@ function App() {
               </AdminRoute>
             }
           />
+          {/* 없는 경로는 홈으로 */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
     </>

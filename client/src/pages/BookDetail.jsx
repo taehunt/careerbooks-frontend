@@ -1,3 +1,5 @@
+// 파일 경로: root/client/src/pages/BookDetail.jsx
+
 import { useEffect, useState, useContext } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -5,6 +7,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import { AuthContext } from "../context/AuthContext";
+
+axios.defaults.withCredentials = true;
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const UPLOADS = import.meta.env.VITE_UPLOADS_URL;
@@ -34,10 +38,7 @@ function BookDetail() {
     axios
       .get(`${API}/api/books/${slug}`)
       .then((res) => setBook(res.data))
-      .catch((err) => {
-        console.error("책 정보 불러오기 실패", err);
-        setNotFound(true);
-      });
+      .catch(() => setNotFound(true));
   }, [slug]);
 
   useEffect(() => {
@@ -56,21 +57,28 @@ function BookDetail() {
       .catch(() => setHasAccess(false));
   }, [slug]);
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     const token =
       localStorage.getItem("token") || sessionStorage.getItem("token");
     if (!token) {
       alert("로그인이 필요합니다.");
       return;
     }
-
-    const a = document.createElement("a");
-    a.href = `${API}/api/downloads/${slug}`;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    try {
+      const response = await axios.get(`${API}/api/downloads/${slug}`, {
+        responseType: "blob",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${slug}.zip`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch {
+      alert("다운로드 실패");
+    }
   };
 
   const handlePurchase = async () => {
@@ -89,9 +97,8 @@ function BookDetail() {
       );
       alert("구매 완료");
       setHasAccess(true);
-    } catch (err) {
+    } catch {
       alert("구매 오류");
-      console.error(err);
     }
   };
 
@@ -119,18 +126,11 @@ function BookDetail() {
       ) : book ? (
         <>
           <div className="text-sm text-blue-600 mb-2 space-x-1">
-            <Link to="/" className="hover:underline">
-              홈
-            </Link>
+            <Link to="/" className="hover:underline">홈</Link>
             <span>&gt;</span>
-            <Link to="/books" className="hover:underline">
-              전자책 목록
-            </Link>
+            <Link to="/books" className="hover:underline">전자책 목록</Link>
             <span>&gt;</span>
-            <Link
-              to={`/books?category=${book.category}`}
-              className="hover:underline"
-            >
+            <Link to={`/books?category=${book.category}`} className="hover:underline">
               {categoryLabels[book.category] || book.category}
             </Link>
           </div>
@@ -150,12 +150,7 @@ function BookDetail() {
                     {book.price.toLocaleString()}원
                   </span>
                   <span className="ml-2 text-sm text-green-600">
-                    (
-                    {Math.round(
-                      ((book.originalPrice - book.price) / book.originalPrice) *
-                        100
-                    )}
-                    % 할인)
+                    ({Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100)}% 할인)
                   </span>
                 </>
               ) : (
@@ -164,10 +159,8 @@ function BookDetail() {
             </div>
           </div>
 
-          {/* ✅ 구매 / 다운로드 / 크몽 버튼 영역 */}
           <div className="text-left mt-4">
             <div className="flex flex-wrap gap-2">
-              {/* 크몽 버튼 */}
               <a
                 href={book.kmongUrl || "https://kmong.com"}
                 target="_blank"
@@ -176,8 +169,6 @@ function BookDetail() {
               >
                 크몽 페이지로 이동
               </a>
-
-              {/* 구매 or 다운로드 버튼 */}
               {!hasAccess ? (
                 <button
                   onClick={handlePurchase}
@@ -194,23 +185,16 @@ function BookDetail() {
                 </button>
               )}
             </div>
-
-            {/* 모바일 안내문 (다운로드일 때만) */}
             {hasAccess &&
               typeof window !== "undefined" &&
               /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && (
                 <p className="mt-3 text-sm text-gray-500 leading-snug">
-                  모바일에서는 파일이{" "}
-                  <span className="text-blue-600 font-semibold">새 창</span>으로
-                  열립니다. <br />
-                  열린 창에서{" "}
-                  <span className="text-blue-600 font-semibold">공유 버튼</span>
-                  을 눌러 저장하세요 😊
+                  모바일에서는 파일이 <span className="text-blue-600 font-semibold">새 창</span>으로 열립니다.<br />
+                  열린 창에서 <span className="text-blue-600 font-semibold">공유 버튼</span>을 눌러 저장하세요 😊
                 </p>
-              )}
+            )}
           </div>
 
-          {/* 서비스 설명 */}
           <div className="mt-10 mb-10">
             <h3 className="text-xl font-semibold text-gray-800 mb-3 border-l-4 border-blue-500 pl-4">
               💡 서비스 설명
@@ -220,9 +204,7 @@ function BookDetail() {
                 remarkPlugins={[remarkGfm, remarkBreaks]}
                 components={{
                   p: ({ node, ...props }) => <p className="mb-2" {...props} />,
-                  li: ({ node, ...props }) => (
-                    <li className="list-disc ml-5" {...props} />
-                  ),
+                  li: ({ node, ...props }) => <li className="list-disc ml-5" {...props} />,
                 }}
               >
                 {customDescription}
@@ -230,7 +212,6 @@ function BookDetail() {
             </div>
           </div>
 
-          {/* 미리보기 이미지 */}
           <div className="mb-10">
             <h3 className="text-xl font-semibold text-gray-800 mb-3 border-l-4 border-green-500 pl-4 flex justify-between items-center">
               <span>📖 미리보기 이미지</span>

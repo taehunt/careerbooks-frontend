@@ -1,7 +1,11 @@
+// 파일 경로: root/client/src/pages/Home.jsx
+
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import MainSlider from "../components/MainSlider";
+
+axios.defaults.withCredentials = true;  // ★ 추가된 부분
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const UPLOADS = import.meta.env.VITE_UPLOADS_URL;

@@ -1,6 +1,10 @@
+// 파일 경로: root/client/src/pages/BookCategories.jsx
+
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+
+axios.defaults.withCredentials = true;  // ★ 추가된 부분
 
 const API = import.meta.env.VITE_API_BASE_URL;
 

@@ -1,48 +1,45 @@
+// 파일 경로: root/client/src/pages/MyBooks.jsx
+
 import { useEffect, useState, useContext } from "react";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+
+axios.defaults.withCredentials = true;  // ★ 추가된 부분
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
 function MyBooks() {
   const navigate = useNavigate();
-  const { user, logout, isAuthChecked } = useContext(AuthContext); // ✅ isAuthChecked 추가
+  const { user, logout, isAuthChecked } = useContext(AuthContext);
   const [books, setBooks] = useState([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!isAuthChecked) return; // ✅ 인증 확인 전에는 대기
+    if (!isAuthChecked) return;
 
     const token =
       sessionStorage.getItem("token") || localStorage.getItem("token");
 
-    // ✅ user 정보까지 체크해서 인증 만료 방지
     if (!token || !user) {
       logout();
       navigate("/login");
       return;
     }
 
-    fetch(`${API}/api/books/my-books`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => {
-        if (res.status === 403 || res.status === 401) {
-          throw new Error("접근 권한이 없습니다. 다시 로그인해주세요.");
-        }
-        return res.json();
+    axios
+      .get(`${API}/api/books/my-books`, {
+        headers: { Authorization: `Bearer ${token}` },
       })
-      .then((data) => {
-        if (!Array.isArray(data)) {
+      .then((res) => {
+        if (!Array.isArray(res.data)) {
           throw new Error("받은 데이터 형식이 잘못되었습니다.");
         }
-        setBooks(data);
+        setBooks(res.data);
       })
       .catch((err) => {
         console.error("내 책 가져오기 오류:", err.message);
+        setError("내 책을 불러오는 중 오류가 발생했습니다.");
         logout();
         localStorage.removeItem("token");
         localStorage.removeItem("user");
@@ -65,18 +62,24 @@ function MyBooks() {
     return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
   };
 
-  const handleDownload = (slug) => {
+  const handleDownload = async (slug) => {
     const token =
       sessionStorage.getItem("token") || localStorage.getItem("token");
-    const downloadUrl = `${API}/api/downloads/${slug}`;
-
-    const a = document.createElement("a");
-    a.href = downloadUrl;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    try {
+      const response = await axios.get(`${API}/api/downloads/${slug}`, {
+        responseType: "blob",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${slug}.zip`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch {
+      alert("다운로드 실패");
+    }
   };
 
   if (!isAuthChecked) {

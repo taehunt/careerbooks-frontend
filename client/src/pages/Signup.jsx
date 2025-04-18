@@ -1,37 +1,45 @@
-import { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+// 파일 경로: root/client/src/pages/Signup.jsx
+
+import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
+axios.defaults.withCredentials = true;  // ★ 추가된 부분
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
 function Signup() {
-  const [form, setForm] = useState({ userId: '', password: '', nickname: '' });
+  const [form, setForm] = useState({ userId: "", password: "", nickname: "" });
   const navigate = useNavigate();
 
   const validate = () => {
     const { userId, password, nickname } = form;
 
     if (!nickname || !userId || !password) {
-      alert('모든 항목을 입력해주세요.');
+      alert("모든 항목을 입력해주세요.");
       return false;
     }
 
     const koreanRegex = /^[가-힣]{2,8}$/;
     const englishRegex = /^[a-zA-Z]{4,8}$/;
     if (!koreanRegex.test(nickname) && !englishRegex.test(nickname)) {
-      alert('닉네임은 한글(2~8자) 또는 영문(4~8자)만 가능하며,\n자음/모음 단독, 숫자/특수문자 또는 혼용은 불가합니다.');
+      alert(
+        "닉네임은 한글(2~8자) 또는 영문(4~8자)만 가능하며,\n자음/모음 단독, 숫자/특수문자 또는 혼용은 불가합니다."
+      );
       return false;
     }
 
     const userIdRegex = /^[a-zA-Z0-9]{4,20}$/;
     if (!userIdRegex.test(userId)) {
-      alert('아이디는 영어와 숫자만 입력 가능하며, 4~20자까지 입력 가능합니다.');
+      alert("아이디는 영어와 숫자만 입력 가능하며, 4~20자까지 입력 가능합니다.");
       return false;
     }
 
     const passwordRegex = /^[a-zA-Z0-9!@#$%^&*()_+{}[\]:;<>,.?~\\/-]{6,20}$/;
     if (!passwordRegex.test(password)) {
-      alert('비밀번호는 영어, 숫자, 특수문자 조합만 가능하며, 6~20자까지 입력 가능합니다.');
+      alert(
+        "비밀번호는 영어, 숫자, 특수문자 조합만 가능하며, 6~20자까지 입력 가능합니다."
+      );
       return false;
     }
 
@@ -44,10 +52,10 @@ function Signup() {
 
     try {
       await axios.post(`${API}/api/auth/signup`, form);
-      alert('회원가입 성공 :)');
-      navigate('/login');
+      alert("회원가입 성공 :)");
+      navigate("/login");
     } catch (err) {
-      alert(err.response?.data?.message || '에러가 발생했습니다.');
+      alert(err.response?.data?.message || "에러가 발생했습니다.");
     }
   };
 
@@ -73,7 +81,10 @@ function Signup() {
           className="w-full border p-2"
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 hover:bg-blue-700 transition">
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 hover:bg-blue-700 transition"
+        >
           가입하기
         </button>
       </form>

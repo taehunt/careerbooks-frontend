@@ -1,7 +1,11 @@
+// 파일 경로: root/client/src/pages/Login.jsx
+
 import { useState, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+
+axios.defaults.withCredentials = true;  // ★ 추가된 부분
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
