@@ -152,8 +152,7 @@ function BookDetail() {
                   <span className="ml-2 text-sm text-green-600">
                     (
                     {Math.round(
-                      ((book.originalPrice - book.price) /
-                        book.originalPrice) *
+                      ((book.originalPrice - book.price) / book.originalPrice) *
                         100
                     )}
                     % 할인)
@@ -175,21 +174,23 @@ function BookDetail() {
               >
                 크몽 페이지로 이동
               </a>
-              {!hasAccess ? (
-                <button
-                  onClick={handlePurchase}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow"
-                >
-                  홈페이지 결제 진행
-                </button>
-              ) : (
-                <button
-                  onClick={handleDownload}
-                  className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow"
-                >
-                  다운로드
-                </button>
-              )}
+				{/*
+					{!hasAccess ? (
+					<button
+					onClick={handlePurchase}
+					className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow"
+					>
+						홈페이지 결제 진행
+					</button>
+					) : (
+					<button
+					onClick={handleDownload}
+					className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow"
+					>
+						다운로드
+					</button>
+					)}
+				*/}
             </div>
             {hasAccess &&
               typeof window !== "undefined" &&
@@ -200,9 +201,7 @@ function BookDetail() {
                   열립니다.
                   <br />
                   열린 창에서{" "}
-                  <span className="text-blue-600 font-semibold">
-                    공유 버튼
-                  </span>
+                  <span className="text-blue-600 font-semibold">공유 버튼</span>
                   을 눌러 저장하세요 😊
                 </p>
               )}
