@@ -103,12 +103,14 @@ function Navbar() {
 
           {user ? (
             <>
+			  {/*
               <Link
                 to="/my-books"
                 className="hover:text-blue-500 navMenu block py-2"
               >
                 내 책보기
               </Link>
+			  */}
               {user.role === "admin" && (
                 <Link
                   to="/admin"
@@ -202,6 +204,7 @@ function Navbar() {
 
             {user ? (
               <>
+			    {/*
                 <Link
                   to="/my-books"
                   className="block py-2"
@@ -209,6 +212,7 @@ function Navbar() {
                 >
                   내 책
                 </Link>
+				*/}
                 {user.role === "admin" && (
                   <Link
                     to="/admin"
