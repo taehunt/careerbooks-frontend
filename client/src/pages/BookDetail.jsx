@@ -172,7 +172,7 @@ function BookDetail() {
                 rel="noopener noreferrer"
                 className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded shadow"
               >
-                크몽 페이지로 이동
+                크몽에서 구매하기
               </a>
 				{/*
 					{!hasAccess ? (
@@ -192,6 +192,7 @@ function BookDetail() {
 					)}
 				*/}
             </div>
+			{/*
             {hasAccess &&
               typeof window !== "undefined" &&
               /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && (
@@ -205,6 +206,7 @@ function BookDetail() {
                   을 눌러 저장하세요 😊
                 </p>
               )}
+				*/}
           </div>
 
           <div className="mt-10 mb-10">
