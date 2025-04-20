@@ -12,11 +12,6 @@ export default function BookList() {
   const [pagination, setPagination] = useState({ page: 1, pages: 1 });
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [showEditor, setShowEditor] = useState(false);
-  const [selectedSlug, setSelectedSlug] = useState("");
-  const [editorContent, setEditorContent] = useState("");
-  const [loadingDesc, setLoadingDesc] = useState(false);
-
   const location = useLocation();
   const categoryLabels = {
     frontend: "프론트엔드 개발",
@@ -41,39 +36,15 @@ export default function BookList() {
     axios
       .get(`${API}/api/books?${params.toString()}`)
       .then((res) => {
-        const data = res.data.books || [];
-        setBooks(data);
-        setPagination(res.data.pagination || { page: 1, pages: 1 });
+        setBooks(res.data.books);
+        setPagination(res.data.pagination);
       })
       .catch((err) => console.error("도서 목록 불러오기 실패:", err));
   }, [category, currentPage]);
 
-  useEffect(() => {
-    if (showEditor && selectedSlug) {
-      setLoadingDesc(true);
-      axios
-        .get(`${API}/api/books/${selectedSlug}/description`)
-        .then((res) => setEditorContent(res.data.description || ""))
-        .catch((err) => console.error("설명 불러오기 실패:", err))
-        .finally(() => setLoadingDesc(false));
-    }
-  }, [showEditor, selectedSlug]);
-
-  const handleSave = async () => {
-    try {
-      await axios.put(`${API}/api/books/${selectedSlug}/description`, {
-        description: editorContent,
-      });
-      alert("설명이 저장되었습니다.");
-      setShowEditor(false);
-    } catch (err) {
-      console.error(err);
-      alert("설명 저장 중 오류 발생");
-    }
-  };
-
   return (
     <div className="space-y-8">
+      {/* 상단 경로 */}
       <div className="text-sm text-blue-600 mb-4 space-x-1">
         <Link to="/" className="hover:underline">홈</Link>
         <span>&gt;</span>
@@ -116,7 +87,8 @@ export default function BookList() {
                       (
                       {Math.round(
                         ((book.originalPrice - book.price) / book.originalPrice) * 100
-                      )}% 할인)
+                      )}
+                      % 할인)
                     </span>
                   </>
                 ) : (
@@ -134,6 +106,7 @@ export default function BookList() {
         )}
       </div>
 
+      {/* 페이지네이션 */}
       <div className="flex justify-center space-x-2">
         <button
           onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -159,63 +132,6 @@ export default function BookList() {
           다음
         </button>
       </div>
-
-      <div className="text-center">
-        <button
-          onClick={() => setShowEditor(true)}
-          className="mt-6 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded transition"
-        >
-          설명 수정
-        </button>
-      </div>
-
-      {showEditor && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-xl max-h-[80vh] overflow-auto">
-            <h2 className="text-xl font-bold mb-4">설명 수정</h2>
-
-            <select
-              value={selectedSlug}
-              onChange={(e) => setSelectedSlug(e.target.value)}
-              className="w-full mb-4 border p-2 rounded"
-            >
-              <option value="">전자책 선택</option>
-              {books.map((book) => (
-                <option key={book.slug} value={book.slug}>
-                  {book.titleIndex}. {book.title}
-                </option>
-              ))}
-            </select>
-
-            {loadingDesc ? (
-              <p>로딩 중...</p>
-            ) : (
-              <textarea
-                value={editorContent}
-                onChange={(e) => setEditorContent(e.target.value)}
-                rows={10}
-                className="w-full border p-2 rounded mb-4 whitespace-pre-wrap"
-              />
-            )}
-
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={() => setShowEditor(false)}
-                className="px-4 py-2 border rounded"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={!selectedSlug}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded disabled:opacity-50"
-              >
-                저장
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
