@@ -26,9 +26,9 @@ export default function BookList() {
     const params = new URLSearchParams(location.search);
     return params.get("category");
   };
-
   const category = getCategoryFromURL();
 
+  // 목록 로딩
   useEffect(() => {
     const params = new URLSearchParams();
     if (category) params.append("category", category);
@@ -41,12 +41,15 @@ export default function BookList() {
         setBooks(res.data.books || []);
         setPagination(res.data.pagination || { page: 1, pages: 1 });
       })
-      .catch((err) => console.error("도서 목록 불러오기 실패:", err));
+      .catch((err) => {
+        console.error("도서 목록 불러오기 실패:", err);
+        setBooks([]);
+      });
   }, [category, currentPage]);
 
   return (
     <div className="space-y-8">
-      {/* ✅ 상단 경로 라벨 */}
+      {/* ✅ 상단 경로 표시 */}
       <div className="text-sm text-blue-600 mb-4 space-x-1">
         <Link to="/" className="hover:underline">홈</Link>
         <span>&gt;</span>
@@ -63,81 +66,79 @@ export default function BookList() {
 
       <h1 className="text-3xl font-bold text-gray-800">전자책 목록</h1>
 
-      <div className="space-y-4">
-        {books.length === 0 ? (
-          <p className="text-gray-500">등록된 전자책이 없습니다.</p>
-        ) : (
-          books.map((book) => (
-            <div
-              key={book.slug}
-              className="bg-white shadow rounded-lg p-6 transition hover:shadow-lg hover:-translate-y-1"
+      {/* ✅ 전자책 목록 */}
+      {books.length === 0 ? (
+        <p className="text-gray-500">등록된 전자책이 없습니다.</p>
+      ) : (
+        books.map((book) => (
+          <div
+            key={book.slug}
+            className="bg-white shadow rounded-lg p-6 mb-4 transition hover:shadow-lg hover:-translate-y-1"
+          >
+            <h2 className="text-xl font-semibold text-blue-600">
+              {book.titleIndex}. {book.title}
+            </h2>
+            <p className="text-gray-700 mt-2">{book.description}</p>
+            <p className="font-semibold text-blue-600 mb-6 text-lg">
+              {book.originalPrice && book.originalPrice > book.price ? (
+                <>
+                  <span className="line-through text-gray-400 mr-2 text-base">
+                    {book.originalPrice.toLocaleString()}원
+                  </span>
+                  <span className="text-red-600 font-bold">
+                    {book.price.toLocaleString()}원
+                  </span>
+                  <span className="ml-2 text-sm text-green-600">
+                    ({Math.round(
+                      ((book.originalPrice - book.price) / book.originalPrice) * 100
+                    )}% 할인)
+                  </span>
+                </>
+              ) : (
+                <>{book.price.toLocaleString()}원</>
+              )}
+            </p>
+
+            <Link
+              to={`/books/${book.slug}`}
+              className="inline-block mt-4 text-sm text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition"
             >
-              <h2 className="text-xl font-semibold text-blue-600">
-                {book.titleIndex}. {book.title}
-              </h2>
-              <p className="text-gray-700 mt-2">{book.description}</p>
-
-              <p className="font-semibold text-blue-600 mb-6 text-lg">
-                {book.originalPrice && book.originalPrice > book.price ? (
-                  <>
-                    <span className="line-through text-gray-400 mr-2 text-base">
-                      {book.originalPrice.toLocaleString()}원
-                    </span>
-                    <span className="text-red-600 font-bold">
-                      {book.price.toLocaleString()}원
-                    </span>
-                    <span className="ml-2 text-sm text-green-600">
-                      (
-                      {Math.round(
-                        ((book.originalPrice - book.price) / book.originalPrice) * 100
-                      )}
-                      % 할인)
-                    </span>
-                  </>
-                ) : (
-                  <>{book.price.toLocaleString()}원</>
-                )}
-              </p>
-
-              <Link
-                to={`/books/${book.slug}`}
-                className="inline-block mt-4 text-sm text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition"
-              >
-                자세히 보기
-              </Link>
-            </div>
-          ))
-        )}
-      </div>
+              자세히 보기
+            </Link>
+          </div>
+        ))
+      )}
 
       {/* ✅ 페이지네이션 */}
-      <div className="flex justify-center space-x-2">
-        <button
-          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-          disabled={pagination.page === 1}
-          className="px-3 py-1 border rounded disabled:opacity-50"
-        >
-          이전
-        </button>
-        {Array.from({ length: pagination.pages }).map((_, idx) => (
+      {pagination.pages > 1 && (
+        <div className="flex justify-center space-x-2">
           <button
-            key={idx}
-            onClick={() => setCurrentPage(idx + 1)}
-            className={`px-3 py-1 border rounded ${
-              pagination.page === idx + 1 ? "bg-blue-500 text-white" : ""
-            }`}
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            disabled={pagination.page === 1}
+            className="px-3 py-1 border rounded disabled:opacity-50"
           >
-            {idx + 1}
+            이전
           </button>
-        ))}
-        <button
-          onClick={() => setCurrentPage((p) => Math.min(p + 1, pagination.pages))}
-          disabled={pagination.page === pagination.pages}
-          className="px-3 py-1 border rounded disabled:opacity-50"
-        >
-          다음
-        </button>
-      </div>
+          {Array.from({ length: pagination.pages }).map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentPage(idx + 1)}
+              className={`px-3 py-1 border rounded ${
+                pagination.page === idx + 1 ? "bg-blue-500 text-white" : ""
+              }`}
+            >
+              {idx + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, pagination.pages))}
+            disabled={pagination.page === pagination.pages}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
+            다음
+          </button>
+        </div>
+      )}
     </div>
   );
 }
