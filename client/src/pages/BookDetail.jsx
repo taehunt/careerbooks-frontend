@@ -219,6 +219,15 @@ function BookDetail() {
                 <h3 className="text-lg font-bold text-gray-800">
                   🎁 얼리버드 혜택
                 </h3>
+
+                <iframe
+                  src="https://pub-bb775a03143c476396cd5c6200cab293.r2.dev/timer.html"
+                  width="100%"
+                  height="40"
+                  className="border-none"
+                  title="얼리버드 타이머"
+                />
+
                 <p className="text-gray-700 text-sm">
                   정가{" "}
                   <span className="line-through text-gray-400">
