@@ -80,9 +80,11 @@ export default function Admin() {
 
   const refreshBooks = async () => {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+
     const res = await axios.get(`${API}/api/books`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+	
     const data = Array.isArray(res.data) ? res.data : res.data.books;
     setBooks(data.sort((a, b) => a.titleIndex - b.titleIndex));
   };
