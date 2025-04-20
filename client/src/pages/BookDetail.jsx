@@ -155,7 +155,7 @@ function BookDetail() {
               <h3 className="text-xl font-semibold text-gray-800 mb-3 border-l-4 border-blue-500 pl-4">
                 💡 서비스 설명
               </h3>
-              <div className="text-sm text-gray-800 whitespace-pre-wrap break-words">
+              <div className="text-sm text-gray-800 break-words">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm, remarkBreaks]}
                   rehypePlugins={[rehypeRaw]}
