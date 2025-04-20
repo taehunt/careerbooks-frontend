@@ -2,19 +2,21 @@
 
 import { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
-axios.defaults.withCredentials = true;  // ★ 추가된 부분
-
+axios.defaults.withCredentials = true;
 const API = import.meta.env.VITE_API_BASE_URL;
 
 function Admin() {
   const navigate = useNavigate();
   const { user, logout, isAuthChecked } = useContext(AuthContext);
 
+  // 전자책 & 회원 데이터
   const [books, setBooks] = useState([]);
   const [users, setUsers] = useState([]);
+
+  // 편집 / 등록 폼 상태
   const [editRowId, setEditRowId] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [form, setForm] = useState({
@@ -28,15 +30,22 @@ function Admin() {
     kmongUrl: "",
   });
 
+  // Collapse 토글
   const [bookCollapse, setBookCollapse] = useState(true);
   const [userCollapse, setUserCollapse] = useState(false);
 
+  // 설명 수정 모달 상태
+  const [showDescModal, setShowDescModal] = useState(false);
+  const [descSlug, setDescSlug] = useState("");
+  const [descContent, setDescContent] = useState("");
+  const [descLoading, setDescLoading] = useState(false);
+
+  // 초기 데이터 로드
   useEffect(() => {
     if (!isAuthChecked) return;
+    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
 
-    const token =
-      sessionStorage.getItem("token") || localStorage.getItem("token");
-
+    // 관리자 체크
     if (!token || !user || user.role !== "admin") {
       alert("관리자만 접근할 수 있습니다.");
       logout();
@@ -44,23 +53,22 @@ function Admin() {
       return;
     }
 
+    // 전자책 목록
     axios
-      .get(`${API}/api/books`)
-      .then((res) =>
-        setBooks(res.data.sort((a, b) => a.titleIndex - b.titleIndex))
-      )
-      .catch((err) => console.error("📘 전자책 목록 불러오기 실패", err));
-
-    axios
-      .get(`${API}/api/admin/users`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .get(`${API}/api/books?page=1&limit=100`, { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => {
-        const result = Array.isArray(res.data)
-          ? res.data
-          : res.data?.users || [];
-        setUsers(result);
+        const data = res.data.books || res.data;
+        setBooks(data.sort((a, b) => a.titleIndex - b.titleIndex));
       })
+      .catch((err) => {
+        console.error("📘 전자책 목록 불러오기 실패", err);
+        alert("전자책 목록을 불러오는 중 오류가 발생했습니다.");
+      });
+
+    // 회원 목록
+    axios
+      .get(`${API}/api/admin/users`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => setUsers(res.data))
       .catch((err) => {
         console.error("👥 회원 목록 불러오기 실패", err);
         alert("세션이 만료되었습니다. 다시 로그인해주세요.");
@@ -69,20 +77,20 @@ function Admin() {
       });
   }, [user, isAuthChecked, logout, navigate]);
 
+  // 전자책 목록 리프레시
   const refreshBooks = async () => {
-    const res = await axios.get(`${API}/api/books`);
-    setBooks(res.data.sort((a, b) => a.titleIndex - b.titleIndex));
+    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+    const res = await axios.get(`${API}/api/books?page=1&limit=100`, { headers: { Authorization: `Bearer ${token}` } });
+    const data = res.data.books || res.data;
+    setBooks(data.sort((a, b) => a.titleIndex - b.titleIndex));
   };
 
+  // 전자책 등록
   const uploadBook = async () => {
-    const token =
-      localStorage.getItem("token") || sessionStorage.getItem("token");
+    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
     if (!form.zipUrl) return alert("ZIP 파일의 Cloudflare URL을 입력해주세요.");
-
     try {
-      await axios.post(`${API}/api/admin/books`, form, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.post(`${API}/api/admin/books`, form, { headers: { Authorization: `Bearer ${token}` } });
       alert("📘 전자책 등록 완료!");
       setForm({
         title: "",
@@ -101,6 +109,7 @@ function Admin() {
     }
   };
 
+  // 전자책 수정 저장
   const saveEdit = async (id) => {
     try {
       await axios.put(`${API}/api/admin/books/${id}`, editForm);
@@ -112,6 +121,7 @@ function Admin() {
     }
   };
 
+  // 전자책 삭제
   const deleteBook = async (id) => {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
     try {
@@ -122,19 +132,46 @@ function Admin() {
     }
   };
 
+  // 설명 편집 모달 오픈 시 설명 불러오기
+  useEffect(() => {
+    if (showDescModal && descSlug) {
+      setDescLoading(true);
+      axios
+        .get(`${API}/api/books/${descSlug}/description`)
+        .then((res) => setDescContent(res.data.description || ""))
+        .catch((err) => console.error("설명 불러오기 실패", err))
+        .finally(() => setDescLoading(false));
+    }
+  }, [showDescModal, descSlug]);
+
+  // 설명 저장
+  const handleDescSave = async () => {
+    try {
+      const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+      await axios.put(
+        `${API}/api/books/${descSlug}/description`,
+        { description: descContent },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("✅ 설명이 저장되었습니다.");
+      setShowDescModal(false);
+      setDescSlug("");
+      setDescContent("");
+    } catch (err) {
+      console.error("설명 저장 실패", err);
+      alert("설명 저장 중 오류가 발생했습니다.");
+    }
+  };
+
   if (!isAuthChecked) {
-    return (
-      <div className="text-center mt-10 text-gray-500">
-        로그인 상태 확인 중입니다...
-      </div>
-    );
+    return <div className="text-center mt-10 text-gray-500">로그인 상태 확인 중입니다...</div>;
   }
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-8">
       <h1 className="text-3xl font-bold mb-6">관리자 페이지</h1>
 
-      {/* 📚 Collapse 영역 */}
+      {/* 전자책 관리 섹션 */}
       <section>
         <button
           onClick={() => setBookCollapse(!bookCollapse)}
@@ -145,7 +182,7 @@ function Admin() {
 
         {bookCollapse && (
           <div className="space-y-12">
-            {/* 📘 전자책 목록 테이블 */}
+            {/* 전자책 목록 테이블 */}
             <div>
               <h2 className="text-xl font-semibold mb-2">📘 전자책 목록</h2>
               <table className="w-full border text-sm">
@@ -170,10 +207,7 @@ function Admin() {
                             type="number"
                             value={editForm.titleIndex}
                             onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                titleIndex: e.target.value,
-                              })
+                              setEditForm({ ...editForm, titleIndex: e.target.value })
                             }
                             className="w-16 border px-1"
                           />
@@ -187,10 +221,7 @@ function Admin() {
                             type="text"
                             value={editForm.title}
                             onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                title: e.target.value,
-                              })
+                              setEditForm({ ...editForm, title: e.target.value })
                             }
                             className="w-full border px-1"
                           />
@@ -204,10 +235,7 @@ function Admin() {
                           <select
                             value={editForm.category}
                             onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                category: e.target.value,
-                              })
+                              setEditForm({ ...editForm, category: e.target.value })
                             }
                             className="border px-1"
                           >
@@ -226,10 +254,7 @@ function Admin() {
                             type="number"
                             value={editForm.price}
                             onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                price: e.target.value,
-                              })
+                              setEditForm({ ...editForm, price: e.target.value })
                             }
                             className="w-20 border px-1"
                           />
@@ -243,10 +268,7 @@ function Admin() {
                             type="number"
                             value={editForm.originalPrice}
                             onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                originalPrice: e.target.value,
-                              })
+                              setEditForm({ ...editForm, originalPrice: e.target.value })
                             }
                             className="w-20 border px-1"
                           />
@@ -260,10 +282,7 @@ function Admin() {
                             type="text"
                             value={editForm.kmongUrl}
                             onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                kmongUrl: e.target.value,
-                              })
+                              setEditForm({ ...editForm, kmongUrl: e.target.value })
                             }
                             className="w-full border px-1"
                           />
@@ -315,12 +334,6 @@ function Admin() {
                             >
                               수정
                             </button>
-                            <Link
-                              to={`/admin/books/edit?slug=${book.slug}`}
-                              className="text-blue-600 hover:underline"
-                            >
-                              설명 수정
-                            </Link>
                             <button
                               onClick={() => deleteBook(book._id)}
                               className="text-red-600 hover:underline"
@@ -334,6 +347,16 @@ function Admin() {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* 전자책 설명 수정 버튼 */}
+            <div className="text-center">
+              <button
+                onClick={() => setShowDescModal(true)}
+                className="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded"
+              >
+                📄 설명 수정
+              </button>
             </div>
 
             {/* 📥 전자책 등록 */}
