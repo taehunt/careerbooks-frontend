@@ -6,6 +6,7 @@ import axios from "axios";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
+import rehypeRaw from "rehype-raw";
 import { AuthContext } from "../context/AuthContext";
 
 axios.defaults.withCredentials = true;
@@ -221,6 +222,7 @@ function BookDetail() {
             <div className="text-sm text-gray-800 leading-relaxed space-y-4 whitespace-pre-wrap break-words">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm, remarkBreaks]}
+				rehypePlugins={[rehypeRaw]}
                 components={{
                   p: ({ node, ...props }) => <p className="mb-2" {...props} />,
                   li: ({ node, ...props }) => (
