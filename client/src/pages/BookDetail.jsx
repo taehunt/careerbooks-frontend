@@ -163,10 +163,9 @@ function BookDetail() {
                     p: ({ node, ...props }) => (
                       <p className="mb-2" {...props} />
                     ),
-                    ul: ({ node, ...props }) => (
-                      <ul className="list-disc ml-6 space-y-1" {...props} />
+                    li: ({ node, ...props }) => (
+                      <li className="list-disc ml-5" {...props} />
                     ),
-                    li: ({ node, ...props }) => <li {...props} />,
                   }}
                 >
                   {customDescription}
