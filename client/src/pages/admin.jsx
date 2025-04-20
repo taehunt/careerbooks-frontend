@@ -8,7 +8,7 @@ import { AuthContext } from "../context/AuthContext";
 axios.defaults.withCredentials = true;
 const API = import.meta.env.VITE_API_BASE_URL;
 
-function Admin() {
+export default function Admin() {
   const navigate = useNavigate();
   const { user, logout, isAuthChecked } = useContext(AuthContext);
 
@@ -55,7 +55,9 @@ function Admin() {
 
     // 전자책 목록
     axios
-      .get(`${API}/api/books?page=1&limit=100`, { headers: { Authorization: `Bearer ${token}` } })
+      .get(`${API}/api/books?page=1&limit=100`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((res) => {
         const data = res.data.books || res.data;
         setBooks(data.sort((a, b) => a.titleIndex - b.titleIndex));
@@ -67,7 +69,9 @@ function Admin() {
 
     // 회원 목록
     axios
-      .get(`${API}/api/admin/users`, { headers: { Authorization: `Bearer ${token}` } })
+      .get(`${API}/api/admin/users`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((res) => setUsers(res.data))
       .catch((err) => {
         console.error("👥 회원 목록 불러오기 실패", err);
@@ -80,7 +84,9 @@ function Admin() {
   // 전자책 목록 리프레시
   const refreshBooks = async () => {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
-    const res = await axios.get(`${API}/api/books?page=1&limit=100`, { headers: { Authorization: `Bearer ${token}` } });
+    const res = await axios.get(`${API}/api/books?page=1&limit=100`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     const data = res.data.books || res.data;
     setBooks(data.sort((a, b) => a.titleIndex - b.titleIndex));
   };
@@ -88,9 +94,14 @@ function Admin() {
   // 전자책 등록
   const uploadBook = async () => {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
-    if (!form.zipUrl) return alert("ZIP 파일의 Cloudflare URL을 입력해주세요.");
+    if (!form.zipUrl) {
+      alert("ZIP 파일의 Cloudflare URL을 입력해주세요.");
+      return;
+    }
     try {
-      await axios.post(`${API}/api/admin/books`, form, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.post(`${API}/api/admin/books`, form, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       alert("📘 전자책 등록 완료!");
       setForm({
         title: "",
@@ -164,7 +175,11 @@ function Admin() {
   };
 
   if (!isAuthChecked) {
-    return <div className="text-center mt-10 text-gray-500">로그인 상태 확인 중입니다...</div>;
+    return (
+      <div className="text-center mt-10 text-gray-500">
+        로그인 상태 확인 중입니다...
+      </div>
+    );
   }
 
   return (
@@ -205,11 +220,11 @@ function Admin() {
                         {editRowId === book._id ? (
                           <input
                             type="number"
+                            className="w-16 border px-1"
                             value={editForm.titleIndex}
                             onChange={(e) =>
                               setEditForm({ ...editForm, titleIndex: e.target.value })
                             }
-                            className="w-16 border px-1"
                           />
                         ) : (
                           book.titleIndex
@@ -219,11 +234,11 @@ function Admin() {
                         {editRowId === book._id ? (
                           <input
                             type="text"
+                            className="w-full border px-1"
                             value={editForm.title}
                             onChange={(e) =>
                               setEditForm({ ...editForm, title: e.target.value })
                             }
-                            className="w-full border px-1"
                           />
                         ) : (
                           book.title
@@ -233,11 +248,11 @@ function Admin() {
                       <td className="border p-2">
                         {editRowId === book._id ? (
                           <select
+                            className="border px-1"
                             value={editForm.category}
                             onChange={(e) =>
                               setEditForm({ ...editForm, category: e.target.value })
                             }
-                            className="border px-1"
                           >
                             <option value="frontend">프론트엔드</option>
                             <option value="backend">백엔드</option>
@@ -252,11 +267,11 @@ function Admin() {
                         {editRowId === book._id ? (
                           <input
                             type="number"
+                            className="w-20 border px-1"
                             value={editForm.price}
                             onChange={(e) =>
                               setEditForm({ ...editForm, price: e.target.value })
                             }
-                            className="w-20 border px-1"
                           />
                         ) : (
                           book.price
@@ -266,11 +281,11 @@ function Admin() {
                         {editRowId === book._id ? (
                           <input
                             type="number"
+                            className="w-20 border px-1"
                             value={editForm.originalPrice}
                             onChange={(e) =>
                               setEditForm({ ...editForm, originalPrice: e.target.value })
                             }
-                            className="w-20 border px-1"
                           />
                         ) : (
                           book.originalPrice
@@ -280,11 +295,11 @@ function Admin() {
                         {editRowId === book._id ? (
                           <input
                             type="text"
+                            className="w-full border px-1"
                             value={editForm.kmongUrl}
                             onChange={(e) =>
                               setEditForm({ ...editForm, kmongUrl: e.target.value })
                             }
-                            className="w-full border px-1"
                           />
                         ) : book.kmongUrl ? (
                           <a
@@ -295,7 +310,9 @@ function Admin() {
                           >
                             링크
                           </a>
-                        ) : null}
+                        ) : (
+                          "-"
+                        )}
                       </td>
                       <td className="border p-2 space-x-2">
                         {editRowId === book._id ? (
@@ -350,16 +367,19 @@ function Admin() {
             </div>
 
             {/* 전자책 설명 수정 버튼 */}
-            <div className="text-center">
-              <button
-                onClick={() => setShowDescModal(true)}
-                className="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded"
-              >
-                📄 설명 수정
-              </button>
+            <div>
+              <h2 className="text-xl font-semibold mb-2">📥 전자책 설명 수정</h2>
+              <div className="text-center">
+                <button
+                  onClick={() => setShowDescModal(true)}
+                  className="mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded"
+                >
+                  📄 설명 수정
+                </button>
+              </div>
             </div>
 
-            {/* 📥 전자책 등록 */}
+            {/* 전자책 등록 */}
             <div>
               <h2 className="text-xl font-semibold mb-2">📥 전자책 등록</h2>
               <div className="space-y-2">
@@ -390,18 +410,14 @@ function Admin() {
                 />
                 <input
                   type="text"
-                  placeholder="kmongUrl"
-                  value={form.kmongUrl}
-                  onChange={(e) =>
-                    setForm({ ...form, kmongUrl: e.target.value })
-                  }
-                  className="border p-2 w-full"
+                  placeholder="kmongUrl"  
+                  value={form.kmongUrl}  
+                  onChange={(e) => setForm({ ...form, kmongUrl: e.target.value })}  
+                  className="border p-2 w-full"  
                 />
                 <select
                   value={form.category}
-                  onChange={(e) =>
-                    setForm({ ...form, category: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, category: e.target.value })}
                   className="border p-2 w-full"
                 >
                   <option value="frontend">프론트엔드</option>
@@ -421,7 +437,7 @@ function Admin() {
         )}
       </section>
 
-      {/* 👥 Collapse 영역 */}
+      {/* 회원 관리 섹션 */}
       <section>
         <button
           onClick={() => setUserCollapse(!userCollapse)}
@@ -457,8 +473,55 @@ function Admin() {
           </div>
         )}
       </section>
+
+      {/* 설명 수정 모달 */}
+      {showDescModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-xl max-h-[80vh] overflow-auto">
+            <h2 className="text-xl font-bold mb-4">전자책 설명 수정</h2>
+
+            <select
+              value={descSlug}
+              onChange={(e) => setDescSlug(e.target.value)}
+              className="w-full mb-4 border p-2 rounded"
+            >
+              <option value="">— 전자책 선택 —</option>
+              {books.map((b) => (
+                <option key={b.slug} value={b.slug}>
+                  {b.titleIndex}. {b.title}
+                </option>
+              ))}
+            </select>
+
+            {descLoading ? (
+              <p>로딩 중…</p>
+            ) : (
+              <textarea
+                value={descContent}
+                onChange={(e) => setDescContent(e.target.value)}
+                rows={10}
+                className="w-full border p-2 rounded mb-4 whitespace-pre-wrap"
+              />
+            )}
+
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setShowDescModal(false)}
+                className="px-4 py-2 border rounded"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleDescSave}
+                disabled={!descSlug}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded disabled:opacity-50"
+              >
+                저장
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-export default Admin;
