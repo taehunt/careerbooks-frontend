@@ -1,3 +1,5 @@
+// 파일 경로: root/client/src/pages/BookDetail.jsx
+
 import { useEffect, useState, useContext } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -6,7 +8,8 @@ import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import rehypeRaw from "rehype-raw";
 import { AuthContext } from "../context/AuthContext";
-import { motion } from "framer-motion";
+
+axios.defaults.withCredentials = true;
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const UPLOADS = import.meta.env.VITE_UPLOADS_URL;
@@ -15,13 +18,13 @@ function BookDetail() {
   const navigate = useNavigate();
   const { slug } = useParams();
   const { user, isAuthChecked } = useContext(AuthContext);
+
   const [book, setBook] = useState(null);
   const [hasAccess, setHasAccess] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [activePreview, setActivePreview] = useState(null);
   const [customDescription, setCustomDescription] = useState("");
-  const [reviewIndex, setReviewIndex] = useState(0);
 
   useEffect(() => {
     if (slug) {
@@ -41,8 +44,12 @@ function BookDetail() {
   }, [slug]);
 
   useEffect(() => {
-    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
-    if (!token) return setHasAccess(false);
+    const token =
+      sessionStorage.getItem("token") || localStorage.getItem("token");
+    if (!token) {
+      setHasAccess(false);
+      return;
+    }
 
     axios
       .get(`${API}/api/books/${slug}/access`, {
@@ -53,9 +60,12 @@ function BookDetail() {
   }, [slug]);
 
   const handleDownload = () => {
-    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
-    if (!token) return alert("로그인이 필요합니다.");
-
+    const token =
+      sessionStorage.getItem("token") || localStorage.getItem("token");
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
     const a = document.createElement("a");
     a.href = `${API}/api/downloads/${slug}?token=${token}`;
     a.setAttribute("download", `${slug}.zip`);
@@ -71,94 +81,160 @@ function BookDetail() {
     designer: "웹디자인",
   };
 
-  const reviews = [
-    "처음엔 반신반의했는데, 지금은 회사 붙었습니다.",
-    "진짜 생초보도 이해할 수 있게 풀어줘서 좋아요!",
-    "기초부터 포트폴리오까지 있어 이직 준비에 최고였습니다.",
-  ];
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setReviewIndex((prev) => (prev + 1) % reviews.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, []);
-
   if (!isAuthChecked) {
-    return <div className="text-center mt-10 text-gray-500">로그인 상태 확인 중입니다...</div>;
+    return (
+      <div className="text-center mt-10 text-gray-500">
+        로그인 상태 확인 중입니다...
+      </div>
+    );
   }
 
-  return notFound ? (
-    <p className="text-center mt-10 text-red-500 font-semibold">존재하지 않는 책입니다.</p>
-  ) : book ? (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-10">
-      {/* 타이핑 애니메이션 헤더 */}
-      <motion.h1
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="text-3xl font-extrabold text-center text-indigo-600"
-      >
-        진짜 생초보를 위한 프론트엔드 전자책, 여기서 시작됩니다.
-      </motion.h1>
-
-      {/* 배너 이미지 영역 (예: 소개 배경) */}
-      <div className="rounded-xl overflow-hidden shadow-md">
-        <img src="https://pub-bb775a03143c476396cd5c6200cab293.r2.dev/ssp_banner.png" alt="배너 이미지" className="w-full h-auto" />
-      </div>
-
-      {/* 스크롤 고정 가격정보 (모바일 하단 fixed) */}
-      <div className="fixed bottom-0 inset-x-0 bg-white border-t shadow-md p-4 z-50 lg:hidden">
-        <div className="flex justify-between items-center">
+  return (
+    <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-12 relative">
+      {notFound ? (
+        <p className="text-center mt-10 text-red-500 font-semibold">
+          존재하지 않는 책입니다.
+        </p>
+      ) : book ? (
+        <>
           <div>
-            <p className="text-xs text-gray-500">얼리버드 특가</p>
-            <p className="text-lg font-bold text-red-600">₩{book.price.toLocaleString()}</p>
+            <div className="text-sm text-blue-600 mb-2 space-x-1">
+              <Link to="/" className="hover:underline">
+                홈
+              </Link>
+              <span>&gt;</span>
+              <Link to="/books" className="hover:underline">
+                전자책 목록
+              </Link>
+              <span>&gt;</span>
+              <Link
+                to={`/books?category=${book.category}`}
+                className="hover:underline"
+              >
+                {categoryLabels[book.category] || book.category}
+              </Link>
+            </div>
+
+            <div className="mt-8 mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 border-b pb-2 mb-4">
+                📘 {book.titleIndex}. {book.title}
+              </h2>
+              <p className="text-gray-600 text-lg mb-2">{book.description}</p>
+            </div>
+
+            <div className="text-left mt-4">
+              <div className="flex flex-wrap gap-2">
+                {book.titleIndex === 0 ? (
+                  <button
+                    onClick={() => {
+                      const a = document.createElement("a");
+                      a.href = `${API}/api/downloads/frontend00`;
+                      a.setAttribute("download", "frontend00.zip");
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                    }}
+                    className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow"
+                  >
+                    무료 다운로드
+                  </button>
+                ) : (
+                  <a
+                    href={book.kmongUrl || "https://kmong.com"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded shadow"
+                  >
+                    크몽에서 구매하기
+                  </a>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-10 mb-10">
+              <h3 className="text-xl font-semibold text-gray-800 mb-3 border-l-4 border-blue-500 pl-4">
+                💡 서비스 설명
+              </h3>
+              <div className="text-sm text-gray-800 leading-relaxed space-y-4 whitespace-pre-wrap break-words">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkBreaks]}
+                  rehypePlugins={[rehypeRaw]}
+                  components={{
+                    p: ({ node, ...props }) => <p className="mb-2" {...props} />,
+                    li: ({ node, ...props }) => (
+                      <li className="list-disc ml-5" {...props} />
+                    ),
+                  }}
+                >
+                  {customDescription}
+                </ReactMarkdown>
+              </div>
+            </div>
+
+            <div className="mb-10">
+              <h3 className="text-xl font-semibold text-gray-800 mb-3 border-l-4 border-green-500 pl-4 flex justify-between items-center">
+                <span>📖 미리보기 이미지</span>
+                <button
+                  onClick={() => setShowPreview(!showPreview)}
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  {showPreview ? "닫기 ▲" : "열기 ▼"}
+                </button>
+              </h3>
+              {showPreview && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  {Array.from({ length: 5 }).map((_, idx) => (
+                    <img
+                      key={idx}
+                      src={`${UPLOADS}/${slug}_preview0${idx + 1}.png`}
+                      alt={`미리보기 ${idx + 1}`}
+                      className="w-full border rounded shadow cursor-pointer"
+                      onClick={() => setActivePreview(idx)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {activePreview !== null && (
+              <div
+                className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+                onClick={() => setActivePreview(null)}
+              >
+                <img
+                  src={`${UPLOADS}/${slug}_preview0${activePreview + 1}.png`}
+                  alt={`확대 미리보기 ${activePreview + 1}`}
+                  className="max-w-full max-h-full rounded-lg"
+                />
+              </div>
+            )}
           </div>
-          <button className="bg-yellow-500 text-white font-bold py-2 px-6 rounded">구매하기</button>
-        </div>
-      </div>
 
-      {/* PG 연동 전용 버튼 */}
-      <div className="hidden lg:block text-right">
-        {/*
-        {!hasAccess ? (
-          <button onClick={handlePurchase} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow">
-            홈페이지 결제 진행
-          </button>
-        ) : (
-          <button onClick={handleDownload} className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow">
-            다운로드
-          </button>
-        )}
-        */}
-      </div>
-
-      {/* 서비스 설명 - md 기반 */}
-      <div className="prose max-w-none">
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm, remarkBreaks]}
-          rehypePlugins={[rehypeRaw]}
-        >
-          {customDescription}
-        </ReactMarkdown>
-      </div>
-
-      {/* 후기 슬라이더 */}
-      <div className="mt-16">
-        <h2 className="text-xl font-semibold mb-4">📣 실제 수강 후기</h2>
-        <motion.div
-          key={reviewIndex}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="bg-gray-50 border rounded-xl p-6 text-center text-gray-800 shadow"
-        >
-          {reviews[reviewIndex]}
-        </motion.div>
-      </div>
+          {/* 구매 고정 박스 (PC) */}
+          {book.titleIndex !== 0 && (
+            <aside className="hidden lg:block sticky top-24 self-start h-fit">
+              <div className="bg-yellow-100 border border-yellow-300 rounded-xl p-6 shadow space-y-3 w-full">
+                <h3 className="text-lg font-bold text-gray-800">🎁 얼리버드 혜택</h3>
+                <p className="text-gray-700 text-sm">
+                  정가 <span className="line-through text-gray-400">{book.originalPrice?.toLocaleString()}원</span>
+                  → <span className="text-red-600 font-semibold">{book.price?.toLocaleString()}원</span>
+                </p>
+                <a
+                  href={book.kmongUrl || "https://kmong.com"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded text-center"
+                >
+                  크몽에서 구매하기
+                </a>
+              </div>
+            </aside>
+          )}
+        </>
+      ) : (
+        <p className="text-center mt-10">책 정보를 불러오는 중입니다...</p>
+      )}
     </div>
-  ) : (
-    <p className="text-center mt-10">책 정보를 불러오는 중입니다...</p>
   );
 }
 
