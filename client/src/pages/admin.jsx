@@ -45,7 +45,6 @@ export default function Admin() {
     if (!isAuthChecked) return;
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
 
-    // 관리자 체크
     if (!token || !user || user.role !== "admin") {
       alert("관리자만 접근할 수 있습니다.");
       logout();
@@ -53,13 +52,12 @@ export default function Admin() {
       return;
     }
 
-    // 전자책 목록
     axios
-      .get(`${API}/api/books?page=1&limit=100`, {
+      .get(`${API}/api/books`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        const data = res.data.books || res.data;
+        const data = Array.isArray(res.data) ? res.data : res.data.books;
         setBooks(data.sort((a, b) => a.titleIndex - b.titleIndex));
       })
       .catch((err) => {
@@ -67,7 +65,6 @@ export default function Admin() {
         alert("전자책 목록을 불러오는 중 오류가 발생했습니다.");
       });
 
-    // 회원 목록
     axios
       .get(`${API}/api/admin/users`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -81,23 +78,18 @@ export default function Admin() {
       });
   }, [user, isAuthChecked, logout, navigate]);
 
-  // 전자책 목록 리프레시
   const refreshBooks = async () => {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
-    const res = await axios.get(`${API}/api/books?page=1&limit=100`, {
+    const res = await axios.get(`${API}/api/books`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    const data = res.data.books || res.data;
+    const data = Array.isArray(res.data) ? res.data : res.data.books;
     setBooks(data.sort((a, b) => a.titleIndex - b.titleIndex));
   };
 
-  // 전자책 등록
   const uploadBook = async () => {
     const token = sessionStorage.getItem("token") || localStorage.getItem("token");
-    if (!form.zipUrl) {
-      alert("ZIP 파일의 Cloudflare URL을 입력해주세요.");
-      return;
-    }
+    if (!form.zipUrl) return alert("ZIP 파일의 Cloudflare URL을 입력해주세요.");
     try {
       await axios.post(`${API}/api/admin/books`, form, {
         headers: { Authorization: `Bearer ${token}` },
@@ -120,7 +112,6 @@ export default function Admin() {
     }
   };
 
-  // 전자책 수정 저장
   const saveEdit = async (id) => {
     try {
       await axios.put(`${API}/api/admin/books/${id}`, editForm);
@@ -132,7 +123,6 @@ export default function Admin() {
     }
   };
 
-  // 전자책 삭제
   const deleteBook = async (id) => {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
     try {
@@ -143,19 +133,17 @@ export default function Admin() {
     }
   };
 
-  // 설명 편집 모달 오픈 시 설명 불러오기
   useEffect(() => {
-    if (showDescModal && descSlug) {
-      setDescLoading(true);
-      axios
-        .get(`${API}/api/books/${descSlug}/description`)
-        .then((res) => setDescContent(res.data.description || ""))
-        .catch((err) => console.error("설명 불러오기 실패", err))
-        .finally(() => setDescLoading(false));
-    }
-  }, [showDescModal, descSlug]);
+    if (!descSlug) return;
 
-  // 설명 저장
+    setDescLoading(true);
+    axios
+      .get(`${API}/api/books/${descSlug}/description`)
+      .then((res) => setDescContent(res.data.description || ""))
+      .catch((err) => console.error("설명 불러오기 실패", err))
+      .finally(() => setDescLoading(false));
+  }, [descSlug]);
+
   const handleDescSave = async () => {
     try {
       const token = sessionStorage.getItem("token") || localStorage.getItem("token");
@@ -173,14 +161,6 @@ export default function Admin() {
       alert("설명 저장 중 오류가 발생했습니다.");
     }
   };
-
-  if (!isAuthChecked) {
-    return (
-      <div className="text-center mt-10 text-gray-500">
-        로그인 상태 확인 중입니다...
-      </div>
-    );
-  }
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-8">
