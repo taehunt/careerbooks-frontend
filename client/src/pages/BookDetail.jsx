@@ -104,7 +104,7 @@ function BookDetail() {
 
       {/* 배너 이미지 영역 (예: 소개 배경) */}
       <div className="rounded-xl overflow-hidden shadow-md">
-        <img src="/images/ebook-banner.png" alt="배너 이미지" className="w-full h-auto" />
+        <img src="https://pub-bb775a03143c476396cd5c6200cab293.r2.dev/ssp_banner.png" alt="배너 이미지" className="w-full h-auto" />
       </div>
 
       {/* 스크롤 고정 가격정보 (모바일 하단 fixed) */}
