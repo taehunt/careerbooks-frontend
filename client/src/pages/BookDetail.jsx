@@ -160,10 +160,13 @@ function BookDetail() {
                   remarkPlugins={[remarkGfm, remarkBreaks]}
                   rehypePlugins={[rehypeRaw]}
                   components={{
-                    p: ({ node, ...props }) => <p className="mb-2" {...props} />,
-                    li: ({ node, ...props }) => (
-                      <li className="list-disc ml-5" {...props} />
+                    p: ({ node, ...props }) => (
+                      <p className="mb-2" {...props} />
                     ),
+                    ul: ({ node, ...props }) => (
+                      <ul className="list-disc ml-6 space-y-1" {...props} />
+                    ),
+                    li: ({ node, ...props }) => <li {...props} />,
                   }}
                 >
                   {customDescription}
@@ -214,10 +217,18 @@ function BookDetail() {
           {book.titleIndex !== 0 && (
             <aside className="hidden lg:block sticky top-24 self-start h-fit">
               <div className="bg-yellow-100 border border-yellow-300 rounded-xl p-6 shadow space-y-3 w-full">
-                <h3 className="text-lg font-bold text-gray-800">🎁 얼리버드 혜택</h3>
+                <h3 className="text-lg font-bold text-gray-800">
+                  🎁 얼리버드 혜택
+                </h3>
                 <p className="text-gray-700 text-sm">
-                  정가 <span className="line-through text-gray-400">{book.originalPrice?.toLocaleString()}원</span>
-                  → <span className="text-red-600 font-semibold">{book.price?.toLocaleString()}원</span>
+                  정가{" "}
+                  <span className="line-through text-gray-400">
+                    {book.originalPrice?.toLocaleString()}원
+                  </span>
+                  →{" "}
+                  <span className="text-red-600 font-semibold">
+                    {book.price?.toLocaleString()}원
+                  </span>
                 </p>
                 <a
                   href={book.kmongUrl || "https://kmong.com"}
