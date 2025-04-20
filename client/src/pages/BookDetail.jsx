@@ -166,47 +166,52 @@ function BookDetail() {
 
           <div className="text-left mt-4">
             <div className="flex flex-wrap gap-2">
-              <a
-                href={book.kmongUrl || "https://kmong.com"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded shadow"
-              >
-                크몽에서 구매하기
-              </a>
-				{/*
-					{!hasAccess ? (
-					<button
-					onClick={handlePurchase}
-					className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow"
-					>
-						홈페이지 결제 진행
-					</button>
-					) : (
-					<button
-					onClick={handleDownload}
-					className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow"
-					>
-						다운로드
-					</button>
-					)}
-				*/}
-            </div>
-			{/*
-            {hasAccess &&
-              typeof window !== "undefined" &&
-              /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && (
-                <p className="mt-3 text-sm text-gray-500 leading-snug">
-                  모바일에서는 파일이{" "}
-                  <span className="text-blue-600 font-semibold">새 창</span>으로
-                  열립니다.
-                  <br />
-                  열린 창에서{" "}
-                  <span className="text-blue-600 font-semibold">공유 버튼</span>
-                  을 눌러 저장하세요 😊
-                </p>
+              {book.titleIndex === 0 ? (
+                <button
+                  onClick={() => {
+                    const a = document.createElement("a");
+                    a.href = `${API}/api/downloads/frontend00`;
+                    a.setAttribute("download", "frontend00.zip");
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                  }}
+                  className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow"
+                >
+                  무료 다운로드
+                </button>
+              ) : (
+                <>
+                  <a
+                    href={book.kmongUrl || "https://kmong.com"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded shadow"
+                  >
+                    크몽에서 구매하기
+                  </a>
+
+                  {/* PG 연동 후 활성화 예정 */}
+                  {/*
+        {!hasAccess ? (
+          <button
+            onClick={handlePurchase}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow"
+          >
+            홈페이지 결제 진행
+          </button>
+        ) : (
+          <button
+            onClick={handleDownload}
+            className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow"
+          >
+            다운로드
+          </button>
+        )}
+        */}
+                </>
               )}
-				*/}
+            </div>
           </div>
 
           <div className="mt-10 mb-10">
