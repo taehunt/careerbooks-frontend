@@ -1,23 +1,23 @@
-import express from 'express';
-import Book from '../models/Book.js';
-import User from '../models/User.js';
-import { verifyAdmin } from '../middleware/verifyAdmin.js';
+import express from "express";
+import Book from "../models/Book.js";
+import User from "../models/User.js";
+import { verifyAdmin } from "../middleware/verifyAdmin.js";
 
 const router = express.Router();
 
 // 관리자 전용: 모든 사용자 목록 조회
-router.get('/users', verifyAdmin, async (req, res) => {
+router.get("/users", verifyAdmin, async (req, res) => {
   try {
-    const users = await User.find().select('-password');  // 비밀번호 제외
+    const users = await User.find().select("-password"); // 비밀번호 제외
     res.json(users);
   } catch (err) {
-    console.error('회원 목록 조회 실패:', err);
-    res.status(500).json({ message: '서버 오류' });
+    console.error("회원 목록 조회 실패:", err);
+    res.status(500).json({ message: "서버 오류" });
   }
 });
 
 // 관리자 전용: 전자책 등록
-router.post('/books', verifyAdmin, async (req, res) => {
+router.post("/books", verifyAdmin, async (req, res) => {
   const {
     title,
     slug,
@@ -33,11 +33,11 @@ router.post('/books', verifyAdmin, async (req, res) => {
   try {
     // 중복 slug 검사
     if (await Book.findOne({ slug })) {
-      return res.status(400).json({ message: '이미 존재하는 슬러그입니다.' });
+      return res.status(400).json({ message: "이미 존재하는 슬러그입니다." });
     }
     // 중복 titleIndex 검사
     if (await Book.findOne({ titleIndex: parseInt(titleIndex) })) {
-      return res.status(400).json({ message: '이미 존재하는 인덱스입니다.' });
+      return res.status(400).json({ message: "이미 존재하는 인덱스입니다." });
     }
 
     const newBook = await Book.create({
@@ -48,19 +48,19 @@ router.post('/books', verifyAdmin, async (req, res) => {
       price: parseInt(price),
       titleIndex: parseInt(titleIndex),
       category,
-      fileName: zipUrl,       // Cloudflare ZIP 파일 URL
-      kmongUrl: kmongUrl || '',
+      fileName: zipUrl, // Cloudflare ZIP 파일 URL
+      kmongUrl: kmongUrl || "",
     });
 
-    res.status(201).json({ message: '등록 완료', book: newBook });
+    res.status(201).json({ message: "등록 완료", book: newBook });
   } catch (err) {
-    console.error('등록 실패:', err);
-    res.status(500).json({ message: '서버 오류' });
+    console.error("등록 실패:", err);
+    res.status(500).json({ message: "서버 오류" });
   }
 });
 
 // 관리자 전용: 전자책 수정
-router.put('/books/:id', verifyAdmin, async (req, res) => {
+router.put("/books/:id", verifyAdmin, async (req, res) => {
   const {
     title,
     slug,
@@ -79,12 +79,12 @@ router.put('/books/:id', verifyAdmin, async (req, res) => {
       titleIndex: parseInt(titleIndex),
     });
     if (existingIndex) {
-      return res.status(400).json({ message: '이미 존재하는 인덱스입니다.' });
+      return res.status(400).json({ message: "이미 존재하는 인덱스입니다." });
     }
 
     const existingBook = await Book.findById(req.params.id);
     if (!existingBook) {
-      return res.status(404).json({ message: '책을 찾을 수 없습니다.' });
+      return res.status(404).json({ message: "책을 찾을 수 없습니다." });
     }
 
     const updated = await Book.findByIdAndUpdate(
@@ -98,71 +98,71 @@ router.put('/books/:id', verifyAdmin, async (req, res) => {
         titleIndex: parseInt(titleIndex),
         category,
         fileName: zipUrl || existingBook.fileName,
-        kmongUrl: kmongUrl || '',
+        kmongUrl: kmongUrl || "",
       },
       { new: true }
     );
 
-    res.json({ message: '수정 완료', book: updated });
+    res.json({ message: "수정 완료", book: updated });
   } catch (err) {
-    console.error('수정 실패:', err);
-    res.status(500).json({ message: '서버 오류' });
+    console.error("수정 실패:", err);
+    res.status(500).json({ message: "서버 오류" });
   }
 });
 
 // 관리자 전용: 전자책 삭제
-router.delete('/books/:id', verifyAdmin, async (req, res) => {
+router.delete("/books/:id", verifyAdmin, async (req, res) => {
   try {
     const deleted = await Book.findByIdAndDelete(req.params.id);
     if (!deleted) {
-      return res.status(404).json({ message: '책을 찾을 수 없습니다.' });
+      return res.status(404).json({ message: "책을 찾을 수 없습니다." });
     }
-    res.json({ message: '삭제 완료' });
+    res.json({ message: "삭제 완료" });
   } catch (err) {
-    console.error('삭제 실패:', err);
-    res.status(500).json({ message: '서버 오류' });
+    console.error("삭제 실패:", err);
+    res.status(500).json({ message: "서버 오류" });
   }
 });
 
 import nodemailer from "nodemailer";
 
-// 관리자 전용: ZIP 파일 이메일로 발송
-router.post("/send-zip", verifyAdmin, async (req, res) => {
-  const { slug, email } = req.body;
+// POST /api/admin/send-ebook
+router.post("/send-ebook", verifyAdmin, async (req, res) => {
+  const { email, fileName, title } = req.body;
+  if (!email || !fileName) {
+    return res.status(400).json({ message: "필수 정보 누락" });
+  }
 
   try {
-    const book = await Book.findOne({ slug });
-    if (!book || !book.fileName) {
-      return res.status(404).json({ message: "해당 책의 zip 파일이 없습니다." });
-    }
-
-    const zipUrl = `https://pub-bb775a03143c476396cd5c6200cab293.r2.dev/${book.fileName}`;
-
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS,
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
 
+    const fileUrl = `https://pub-bb775a03143c476396cd5c6200cab293.r2.dev/${fileName}`;
+    const response = await axios.get(fileUrl, { responseType: "arraybuffer" });
+    const attachmentBuffer = Buffer.from(response.data, "binary");
+
     await transporter.sendMail({
-      from: `"커리어북스" <${process.env.MAIL_USER}>`,
+      from: `"CareerBooks" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: `[커리어북스] ${book.title} 전자책 파일을 보내드립니다`,
-      text: "첨부된 zip 파일을 다운로드하여 학습을 시작하세요.",
+      subject: `[CareerBooks] "${title}" 전자책 첨부파일`,
+      text: `"${title}" 전자책을 첨부파일로 전달드립니다.`,
       attachments: [
         {
-          filename: book.fileName,
-          path: zipUrl,
+          filename: fileName,
+          content: attachmentBuffer,
         },
       ],
     });
 
-    res.json({ message: "이메일 발송 완료" });
+    res.json({ message: "이메일 전송 완료" });
   } catch (err) {
-    console.error("이메일 발송 실패:", err);
-    res.status(500).json({ message: "이메일 발송 중 오류 발생" });
+    console.error("이메일 전송 오류:", err.message);
+    res.status(500).json({ message: "이메일 전송 실패" });
   }
 });
 
