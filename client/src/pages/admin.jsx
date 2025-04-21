@@ -118,11 +118,22 @@ export default function Admin() {
   };
 
   const saveEdit = async (id) => {
+    const token =
+      sessionStorage.getItem("token") || localStorage.getItem("token");
+
     try {
-      await axios.put(`${API}/api/admin/books/${id}`, {
-        ...editForm,
-        zipUrl: editForm.zipUrl,
-      });
+      await axios.put(
+        `${API}/api/admin/books/${id}`,
+        {
+          ...editForm,
+          zipUrl: editForm.zipUrl,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       await refreshBooks();
       setEditRowId(null);
       setEditForm({});
