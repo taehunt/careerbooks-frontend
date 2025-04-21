@@ -16,6 +16,7 @@ import BookDetail from "./pages/BookDetail";
 import BookList from "./pages/BookList";
 import BookCategories from "./pages/BookCategories";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import TransferConfirm from "./pages/TransferConfirm";
 
 // 관리자 페이지
 import Admin from "./pages/admin";
@@ -80,6 +81,7 @@ function App() {
           />
 
           <Route path="/payment/success" element={<PaymentSuccess />} />
+		  <Route path="/transfer-confirm" element={<TransferConfirm />} />
 
           {/* 관리자 전용 라우트 */}
           <Route
