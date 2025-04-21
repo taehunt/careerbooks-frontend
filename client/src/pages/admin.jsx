@@ -12,11 +12,9 @@ export default function Admin() {
   const navigate = useNavigate();
   const { user, logout, isAuthChecked } = useContext(AuthContext);
 
-  // 전자책 & 회원 데이터
   const [books, setBooks] = useState([]);
   const [users, setUsers] = useState([]);
 
-  // 편집 / 등록 폼 상태
   const [editRowId, setEditRowId] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [form, setForm] = useState({
@@ -26,21 +24,18 @@ export default function Admin() {
     price: "",
     titleIndex: "",
     category: "frontend",
-    zipUrl: "",
+    fileName: "",
     kmongUrl: "",
   });
 
-  // Collapse 토글
   const [bookCollapse, setBookCollapse] = useState(true);
   const [userCollapse, setUserCollapse] = useState(false);
 
-  // 설명 수정 모달 상태
   const [showDescModal, setShowDescModal] = useState(false);
   const [descSlug, setDescSlug] = useState("");
   const [descContent, setDescContent] = useState("");
   const [descLoading, setDescLoading] = useState(false);
 
-  // 초기 데이터 로드
   useEffect(() => {
     if (!isAuthChecked) return;
     const token =
@@ -94,7 +89,6 @@ export default function Admin() {
   const uploadBook = async () => {
     const token =
       sessionStorage.getItem("token") || localStorage.getItem("token");
-    if (!form.zipUrl) return alert("ZIP 파일의 Cloudflare URL을 입력해주세요.");
     try {
       await axios.post(`${API}/api/admin/books`, form, {
         headers: { Authorization: `Bearer ${token}` },
@@ -107,7 +101,7 @@ export default function Admin() {
         price: "",
         titleIndex: "",
         category: "frontend",
-        zipUrl: "",
+        fileName: "",
         kmongUrl: "",
       });
       await refreshBooks();
@@ -120,13 +114,11 @@ export default function Admin() {
   const saveEdit = async (id) => {
     const token =
       sessionStorage.getItem("token") || localStorage.getItem("token");
-
     try {
       await axios.put(
         `${API}/api/admin/books/${id}`,
         {
           ...editForm,
-          zipUrl: editForm.zipUrl,
         },
         {
           headers: {
@@ -338,27 +330,21 @@ export default function Admin() {
                           <input
                             type="text"
                             className="w-full border px-1"
-                            value={editForm.zipUrl}
+                            value={editForm.fileName}
                             onChange={(e) =>
                               setEditForm({
                                 ...editForm,
-                                zipUrl: e.target.value,
+                                fileName: e.target.value,
                               })
                             }
                           />
-                        ) : book.zipUrl ? (
-                          <a
-                            href={book.zipUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
-                          >
-                            링크
-                          </a>
+                        ) : book.fileName ? (
+                          <span className="text-green-600 font-bold">✔</span>
                         ) : (
                           "-"
                         )}
                       </td>
+
                       <td className="border p-2 space-x-2">
                         {editRowId === book._id ? (
                           <>
@@ -390,7 +376,7 @@ export default function Admin() {
                                   price: book.price,
                                   originalPrice: book.originalPrice,
                                   kmongUrl: book.kmongUrl || "",
-                                  zipUrl: book.zipUrl || "",
+                                  fileName: book.fileName || "",
                                 });
                               }}
                               className="text-green-600 hover:underline"
