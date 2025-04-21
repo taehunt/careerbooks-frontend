@@ -1,33 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { useLocation } from "react-router-dom";
 
 export default function TransferConfirm() {
-  const location = useLocation();
-  const [books, setBooks] = useState([]);
-  const [submitted, setSubmitted] = useState(false);
+  const [searchParams] = useSearchParams();
+  const slug = searchParams.get("slug");
 
   const [form, setForm] = useState({
     depositor: "",
     email: "",
-    slug: "",
+    slug: "",     // 초기에는 비워두고 useEffect에서 채움
     memo: "",
   });
 
-  // slug 자동 입력
-  useEffect(() => {
-    const slugFromUrl = new URLSearchParams(location.search).get("slug");
-    if (slugFromUrl) {
-      setForm((prev) => ({ ...prev, slug: slugFromUrl }));
-    }
-  }, [location.search]);
+  const [submitted, setSubmitted] = useState(false);
 
-  // 책 목록 불러오기
   useEffect(() => {
-    axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/books`).then((res) => {
-      setBooks(res.data);
-    });
-  }, []);
+    if (slug) {
+      setForm((prev) => ({ ...prev, slug }));
+    }
+  }, [slug]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -35,8 +26,13 @@ export default function TransferConfirm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/purchase-requests`, form);
-    setSubmitted(true);
+    try {
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/purchase-requests`, form);
+      setSubmitted(true);
+    } catch (err) {
+      console.error("제출 오류:", err.response || err);
+      alert("제출 실패");
+    }
   };
 
   return (
@@ -44,9 +40,7 @@ export default function TransferConfirm() {
       <h2 className="text-xl font-bold text-gray-800">무통장 입금 정보 제출</h2>
 
       {submitted ? (
-        <p className="text-green-600 font-semibold">
-          제출이 완료되었습니다. 확인 후 발송드리겠습니다.
-        </p>
+        <p className="text-green-600 font-semibold">제출이 완료되었습니다. 확인 후 발송드리겠습니다.</p>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
@@ -67,20 +61,6 @@ export default function TransferConfirm() {
             required
             className="w-full border px-3 py-2 rounded"
           />
-          <select
-            name="slug"
-            value={form.slug}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded"
-          >
-            <option value="">전자책 선택</option>
-            {books.map((b) => (
-              <option key={b.slug} value={b.slug}>
-                {b.titleIndex}. {b.title}
-              </option>
-            ))}
-          </select>
           <textarea
             name="memo"
             value={form.memo}

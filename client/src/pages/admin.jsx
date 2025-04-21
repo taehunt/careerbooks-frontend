@@ -41,6 +41,9 @@ export default function Admin() {
   const [targetUserEmail, setTargetUserEmail] = useState("");
   const [manualEmail, setManualEmail] = useState("");
 
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedBook, setSelectedBook] = useState(null);
+
   useEffect(() => {
     if (!isAuthChecked) return;
     const token =
@@ -200,24 +203,17 @@ export default function Admin() {
   };
 
   const sendZipByEmail = async () => {
-    const token =
-      sessionStorage.getItem("token") || localStorage.getItem("token");
     try {
-      await axios.post(
-        `${API}/api/admin/send-zip`,
-        {
-          email: manualEmail,
-          slug: targetBook.slug,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      alert("✅ 이메일 발송 완료");
+      await axios.post(`${API}/api/email/send`, {
+        userId: selectedUser._id,
+        slug: selectedBook.slug,
+        to: manualEmail,
+      });
+      alert("✅ 이메일이 전송되었습니다.");
       setShowEmailModal(false);
     } catch (err) {
-      console.error("이메일 발송 오류:", err);
-      alert("이메일 발송 중 오류 발생");
+      console.error("이메일 전송 실패:", err);
+      alert("❌ 이메일 전송 실패");
     }
   };
 
