@@ -124,4 +124,46 @@ router.delete('/books/:id', verifyAdmin, async (req, res) => {
   }
 });
 
+import nodemailer from "nodemailer";
+
+// 관리자 전용: ZIP 파일 이메일로 발송
+router.post("/send-zip", verifyAdmin, async (req, res) => {
+  const { slug, email } = req.body;
+
+  try {
+    const book = await Book.findOne({ slug });
+    if (!book || !book.fileName) {
+      return res.status(404).json({ message: "해당 책의 zip 파일이 없습니다." });
+    }
+
+    const zipUrl = `https://pub-bb775a03143c476396cd5c6200cab293.r2.dev/${book.fileName}`;
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: `"커리어북스" <${process.env.MAIL_USER}>`,
+      to: email,
+      subject: `[커리어북스] ${book.title} 전자책 파일을 보내드립니다`,
+      text: "첨부된 zip 파일을 다운로드하여 학습을 시작하세요.",
+      attachments: [
+        {
+          filename: book.fileName,
+          path: zipUrl,
+        },
+      ],
+    });
+
+    res.json({ message: "이메일 발송 완료" });
+  } catch (err) {
+    console.error("이메일 발송 실패:", err);
+    res.status(500).json({ message: "이메일 발송 중 오류 발생" });
+  }
+});
+
 export default router;

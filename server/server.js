@@ -22,6 +22,7 @@ import Book from "./models/Book.js";
 
 //Utils
 import purchaseRequestRoutes from "./routes/purchaseRequestRoutes.js";
+import emailRoutes from "./routes/emailRoutes.js";
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV || "development"}` });
 
@@ -84,6 +85,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/downloads", downloadRoutes);
 app.use("/api/purchase-requests", purchaseRequestRoutes);
+app.use("/api/email", emailRoutes);
 
 // 헬스 체크
 app.get("/api/ping", (req, res) => {
