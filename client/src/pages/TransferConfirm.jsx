@@ -4,18 +4,25 @@ import { useLocation } from "react-router-dom";
 
 export default function TransferConfirm() {
   const location = useLocation();
-  const slugFromUrl = new URLSearchParams(location.search).get("slug") || "";
+  const [books, setBooks] = useState([]);
+  const [submitted, setSubmitted] = useState(false);
 
   const [form, setForm] = useState({
     depositor: "",
     email: "",
-    slug: slugFromUrl,  // ✅ 초기 slug 세팅
+    slug: "",
     memo: "",
   });
 
-  const [books, setBooks] = useState([]);
-  const [submitted, setSubmitted] = useState(false);
+  // slug 자동 입력
+  useEffect(() => {
+    const slugFromUrl = new URLSearchParams(location.search).get("slug");
+    if (slugFromUrl) {
+      setForm((prev) => ({ ...prev, slug: slugFromUrl }));
+    }
+  }, [location.search]);
 
+  // 책 목록 불러오기
   useEffect(() => {
     axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/books`).then((res) => {
       setBooks(res.data);
