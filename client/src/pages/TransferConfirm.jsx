@@ -1,24 +1,23 @@
-import { useState, useEffect, useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import { useSearchParams } from "react-router-dom";
 
 export default function TransferConfirm() {
-  const [searchParams] = useSearchParams();
-  const slug = searchParams.get("slug");
-
   const [form, setForm] = useState({
     depositor: "",
     email: "",
-    slug: "",     // 초기에는 비워두고 useEffect에서 채움
+    slug: "", // URL에서 받아서 세팅
     memo: "",
   });
-
   const [submitted, setSubmitted] = useState(false);
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    if (slug) {
-      setForm((prev) => ({ ...prev, slug }));
+    const slugParam = searchParams.get("slug");
+    if (slugParam) {
+      setForm((prev) => ({ ...prev, slug: slugParam }));
     }
-  }, [slug]);
+  }, [searchParams]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -30,17 +29,18 @@ export default function TransferConfirm() {
       await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/purchase-requests`, form);
       setSubmitted(true);
     } catch (err) {
-      console.error("제출 오류:", err.response || err);
-      alert("제출 실패");
+      alert("제출 중 오류가 발생했습니다.");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-4 border rounded shadow space-y-4">
+    <div className="max-w-md mx-auto mt-10 p-4 border rounded shadow space-y-4 bg-white">
       <h2 className="text-xl font-bold text-gray-800">무통장 입금 정보 제출</h2>
 
       {submitted ? (
-        <p className="text-green-600 font-semibold">제출이 완료되었습니다. 확인 후 발송드리겠습니다.</p>
+        <p className="text-green-600 font-semibold">
+          ✅ 제출이 완료되었습니다. 확인 후 전자책을 발송해드릴게요!
+        </p>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
@@ -60,6 +60,13 @@ export default function TransferConfirm() {
             placeholder="이메일 주소"
             required
             className="w-full border px-3 py-2 rounded"
+          />
+          <input
+            type="text"
+            name="slug"
+            value={form.slug}
+            readOnly
+            className="w-full border px-3 py-2 rounded bg-gray-100 text-gray-600"
           />
           <textarea
             name="memo"
