@@ -1,0 +1,17 @@
+# 루트 레벨
+node_modules/
+package-lock.json
+package.json
+
+# 빌드 결과
+dist/
+build/
+
+# 환경 변수
+.env
+.env.development
+.env.production
+
+# macOS, VSCode 등
+.DS_Store
+.vscode/
