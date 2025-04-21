@@ -59,6 +59,25 @@ function BookDetail() {
       .catch(() => setHasAccess(false));
   }, [slug]);
 
+  const handleDownload = async () => {
+    try {
+      const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+      const response = await axios.get(`${API}/api/downloads/${slug}`, {
+        responseType: "blob",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${slug}.zip`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      alert("다운로드에 실패했습니다.");
+    }
+  };
+
   const categoryLabels = {
     frontend: "프론트엔드 개발",
     backend: "백엔드 개발",
@@ -122,6 +141,13 @@ function BookDetail() {
                     className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow"
                   >
                     무료 다운로드
+                  </button>
+                ) : hasAccess ? (
+                  <button
+                    onClick={handleDownload}
+                    className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow"
+                  >
+                    다운로드
                   </button>
                 ) : (
                   <>
