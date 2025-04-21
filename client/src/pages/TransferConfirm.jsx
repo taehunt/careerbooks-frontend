@@ -1,13 +1,18 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useLocation } from "react-router-dom";
 
 export default function TransferConfirm() {
+  const location = useLocation();
+  const slugFromUrl = new URLSearchParams(location.search).get("slug") || "";
+
   const [form, setForm] = useState({
     depositor: "",
     email: "",
-    slug: "",
+    slug: slugFromUrl,  // ✅ 초기 slug 세팅
     memo: "",
   });
+
   const [books, setBooks] = useState([]);
   const [submitted, setSubmitted] = useState(false);
 
@@ -32,7 +37,9 @@ export default function TransferConfirm() {
       <h2 className="text-xl font-bold text-gray-800">무통장 입금 정보 제출</h2>
 
       {submitted ? (
-        <p className="text-green-600 font-semibold">제출이 완료되었습니다. 확인 후 발송드리겠습니다.</p>
+        <p className="text-green-600 font-semibold">
+          제출이 완료되었습니다. 확인 후 발송드리겠습니다.
+        </p>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
