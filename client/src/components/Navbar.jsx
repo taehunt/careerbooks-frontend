@@ -1,12 +1,12 @@
 // 파일 경로: root/client/src/components/Navbar.jsx
 
 import React, { useState, useContext } from "react";
-import axios from "axios";                      // ★ 추가된 부분
+import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import logo from "../images/logo.png";
 
-axios.defaults.withCredentials = true;          // ★ 추가된 부분
+axios.defaults.withCredentials = true;
 
 function Navbar() {
   const { user, logout } = useContext(AuthContext);
@@ -103,14 +103,12 @@ function Navbar() {
 
           {user ? (
             <>
-			  {/*
               <Link
                 to="/my-books"
                 className="hover:text-blue-500 navMenu block py-2"
               >
                 내 책보기
               </Link>
-			  */}
               {user.role === "admin" && (
                 <Link
                   to="/admin"
@@ -204,7 +202,6 @@ function Navbar() {
 
             {user ? (
               <>
-			    {/*
                 <Link
                   to="/my-books"
                   className="block py-2"
@@ -212,7 +209,6 @@ function Navbar() {
                 >
                   내 책
                 </Link>
-				*/}
                 {user.role === "admin" && (
                   <Link
                     to="/admin"

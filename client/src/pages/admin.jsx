@@ -545,6 +545,8 @@ export default function Admin() {
                   <th className="p-2 border">닉네임</th>
                   <th className="p-2 border">권한</th>
                   <th className="p-2 border">가입일</th>
+                  <th className="p-2 border">전자책 선택</th>
+                  <th className="p-2 border">구매 확정</th>
                 </tr>
               </thead>
               <tbody>
@@ -555,6 +557,64 @@ export default function Admin() {
                     <td className="border p-2">{u.role || "user"}</td>
                     <td className="border p-2">
                       {new Date(u.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="border p-2">
+                      <select
+                        className="border px-2 py-1 rounded"
+                        value={u.selectedBookSlug || ""}
+                        onChange={(e) => {
+                          const updated = users.map((usr) =>
+                            usr._id === u._id
+                              ? { ...usr, selectedBookSlug: e.target.value }
+                              : usr
+                          );
+                          setUsers(updated);
+                        }}
+                      >
+                        <option value="">선택</option>
+                        {books.map((b) => (
+                          <option key={b.slug} value={b.slug}>
+                            {b.titleIndex}. {b.title}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="border p-2">
+                      <button
+                        onClick={async () => {
+                          const token =
+                            sessionStorage.getItem("token") ||
+                            localStorage.getItem("token");
+
+                          const selectedBook = u.selectedBookSlug;
+                          if (!selectedBook) return alert("책을 선택해주세요");
+
+                          try {
+                            await axios.post(
+                              `${API}/api/admin/confirm-purchase`,
+                              {
+                                userId: u._id,
+                                slug: selectedBook,
+                              },
+                              {
+                                headers: {
+                                  Authorization: `Bearer ${token}`,
+                                },
+                              }
+                            );
+                            alert("✅ 구매 확정 완료");
+                          } catch (err) {
+                            console.error(err);
+                            alert(
+                              err.response?.data?.message ||
+                                "구매 확정 중 오류 발생"
+                            );
+                          }
+                        }}
+                        className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded"
+                      >
+                        확정
+                      </button>
                     </td>
                   </tr>
                 ))}
