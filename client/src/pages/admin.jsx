@@ -43,7 +43,8 @@ export default function Admin() {
   // 초기 데이터 로드
   useEffect(() => {
     if (!isAuthChecked) return;
-    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+    const token =
+      sessionStorage.getItem("token") || localStorage.getItem("token");
 
     if (!token || !user || user.role !== "admin") {
       alert("관리자만 접근할 수 있습니다.");
@@ -79,18 +80,20 @@ export default function Admin() {
   }, [user, isAuthChecked, logout, navigate]);
 
   const refreshBooks = async () => {
-    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+    const token =
+      sessionStorage.getItem("token") || localStorage.getItem("token");
 
     const res = await axios.get(`${API}/api/books`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-	
+
     const data = Array.isArray(res.data) ? res.data : res.data.books;
     setBooks(data.sort((a, b) => a.titleIndex - b.titleIndex));
   };
 
   const uploadBook = async () => {
-    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+    const token =
+      sessionStorage.getItem("token") || localStorage.getItem("token");
     if (!form.zipUrl) return alert("ZIP 파일의 Cloudflare URL을 입력해주세요.");
     try {
       await axios.post(`${API}/api/admin/books`, form, {
@@ -116,7 +119,10 @@ export default function Admin() {
 
   const saveEdit = async (id) => {
     try {
-      await axios.put(`${API}/api/admin/books/${id}`, editForm);
+      await axios.put(`${API}/api/admin/books/${id}`, {
+        ...editForm,
+        zipUrl: editForm.zipUrl,
+      });
       await refreshBooks();
       setEditRowId(null);
       setEditForm({});
@@ -148,7 +154,8 @@ export default function Admin() {
 
   const handleDescSave = async () => {
     try {
-      const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+      const token =
+        sessionStorage.getItem("token") || localStorage.getItem("token");
       await axios.put(
         `${API}/api/books/${descSlug}/description`,
         { description: descContent },
@@ -192,6 +199,7 @@ export default function Admin() {
                     <th className="p-2 border">가격</th>
                     <th className="p-2 border">정가</th>
                     <th className="p-2 border">크몽</th>
+                    <th className="p-2 border">ZIP</th>
                     <th className="p-2 border">관리</th>
                   </tr>
                 </thead>
@@ -205,7 +213,10 @@ export default function Admin() {
                             className="w-16 border px-1"
                             value={editForm.titleIndex}
                             onChange={(e) =>
-                              setEditForm({ ...editForm, titleIndex: e.target.value })
+                              setEditForm({
+                                ...editForm,
+                                titleIndex: e.target.value,
+                              })
                             }
                           />
                         ) : (
@@ -219,7 +230,10 @@ export default function Admin() {
                             className="w-full border px-1"
                             value={editForm.title}
                             onChange={(e) =>
-                              setEditForm({ ...editForm, title: e.target.value })
+                              setEditForm({
+                                ...editForm,
+                                title: e.target.value,
+                              })
                             }
                           />
                         ) : (
@@ -233,7 +247,10 @@ export default function Admin() {
                             className="border px-1"
                             value={editForm.category}
                             onChange={(e) =>
-                              setEditForm({ ...editForm, category: e.target.value })
+                              setEditForm({
+                                ...editForm,
+                                category: e.target.value,
+                              })
                             }
                           >
                             <option value="frontend">프론트엔드</option>
@@ -252,7 +269,10 @@ export default function Admin() {
                             className="w-20 border px-1"
                             value={editForm.price}
                             onChange={(e) =>
-                              setEditForm({ ...editForm, price: e.target.value })
+                              setEditForm({
+                                ...editForm,
+                                price: e.target.value,
+                              })
                             }
                           />
                         ) : (
@@ -266,7 +286,10 @@ export default function Admin() {
                             className="w-20 border px-1"
                             value={editForm.originalPrice}
                             onChange={(e) =>
-                              setEditForm({ ...editForm, originalPrice: e.target.value })
+                              setEditForm({
+                                ...editForm,
+                                originalPrice: e.target.value,
+                              })
                             }
                           />
                         ) : (
@@ -280,12 +303,41 @@ export default function Admin() {
                             className="w-full border px-1"
                             value={editForm.kmongUrl}
                             onChange={(e) =>
-                              setEditForm({ ...editForm, kmongUrl: e.target.value })
+                              setEditForm({
+                                ...editForm,
+                                kmongUrl: e.target.value,
+                              })
                             }
                           />
                         ) : book.kmongUrl ? (
                           <a
                             href={book.kmongUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                          >
+                            링크
+                          </a>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                      <td className="border p-2">
+                        {editRowId === book._id ? (
+                          <input
+                            type="text"
+                            className="w-full border px-1"
+                            value={editForm.zipUrl}
+                            onChange={(e) =>
+                              setEditForm({
+                                ...editForm,
+                                zipUrl: e.target.value,
+                              })
+                            }
+                          />
+                        ) : book.zipUrl ? (
+                          <a
+                            href={book.zipUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:underline"
@@ -327,6 +379,7 @@ export default function Admin() {
                                   price: book.price,
                                   originalPrice: book.originalPrice,
                                   kmongUrl: book.kmongUrl || "",
+                                  zipUrl: book.zipUrl || "",
                                 });
                               }}
                               className="text-green-600 hover:underline"
@@ -350,7 +403,9 @@ export default function Admin() {
 
             {/* 전자책 설명 수정 버튼 */}
             <div>
-              <h2 className="text-xl font-semibold mb-2">📥 전자책 설명 수정</h2>
+              <h2 className="text-xl font-semibold mb-2">
+                📥 전자책 설명 수정
+              </h2>
               <div className="text-center">
                 <button
                   onClick={() => setShowDescModal(true)}
@@ -392,14 +447,18 @@ export default function Admin() {
                 />
                 <input
                   type="text"
-                  placeholder="kmongUrl"  
-                  value={form.kmongUrl}  
-                  onChange={(e) => setForm({ ...form, kmongUrl: e.target.value })}  
-                  className="border p-2 w-full"  
+                  placeholder="kmongUrl"
+                  value={form.kmongUrl}
+                  onChange={(e) =>
+                    setForm({ ...form, kmongUrl: e.target.value })
+                  }
+                  className="border p-2 w-full"
                 />
                 <select
                   value={form.category}
-                  onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, category: e.target.value })
+                  }
                   className="border p-2 w-full"
                 >
                   <option value="frontend">프론트엔드</option>
