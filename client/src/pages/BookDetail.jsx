@@ -59,21 +59,6 @@ function BookDetail() {
       .catch(() => setHasAccess(false));
   }, [slug]);
 
-  const handleDownload = () => {
-    const token =
-      sessionStorage.getItem("token") || localStorage.getItem("token");
-    if (!token) {
-      alert("로그인이 필요합니다.");
-      return;
-    }
-    const a = document.createElement("a");
-    a.href = `${API}/api/downloads/${slug}?token=${token}`;
-    a.setAttribute("download", `${slug}.zip`);
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
-
   const categoryLabels = {
     frontend: "프론트엔드 개발",
     backend: "백엔드 개발",
@@ -148,44 +133,12 @@ function BookDetail() {
                     >
                       크몽에서 구매하기
                     </a>
-
-                    {!hasAccess ? (
-                      <button
-                        onClick={async () => {
-                          const token =
-                            sessionStorage.getItem("token") ||
-                            localStorage.getItem("token");
-                          if (!token) {
-                            alert(
-                              "로그인이 필요합니다. 로그인 후 다시 시도해주세요."
-                            );
-                            navigate("/login");
-                            return;
-                          }
-                          try {
-                            await axios.post(
-                              `${API}/api/books/${slug}/purchase`,
-                              {},
-                              { headers: { Authorization: `Bearer ${token}` } }
-                            );
-                            alert("구매 완료");
-                            setHasAccess(true);
-                          } catch {
-                            alert("구매 오류");
-                          }
-                        }}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow"
-                      >
-                        홈페이지 결제 진행
-                      </button>
-                    ) : (
-                      <button
-                        onClick={handleDownload}
-                        className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow"
-                      >
-                        다운로드
-                      </button>
-                    )}
+                    <Link
+                      to={`/transfer-confirm?slug=${book.slug}`}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow"
+                    >
+                      홈페이지 구매
+                    </Link>
                   </>
                 )}
               </div>
@@ -252,7 +205,6 @@ function BookDetail() {
             )}
           </div>
 
-          {/* 구매 고정 박스 (PC) */}
           {book.titleIndex !== 0 && (
             <aside className="hidden lg:block sticky top-24 self-start h-fit">
               <div className="bg-yellow-100 border border-yellow-300 rounded-xl p-6 shadow space-y-3 w-full">
@@ -269,15 +221,10 @@ function BookDetail() {
                 />
 
                 <p className="text-gray-700 text-sm">
-                  정가{" "}
-                  <span className="line-through text-gray-400">
-                    {book.originalPrice?.toLocaleString()}원
-                  </span>
-                  →{" "}
-                  <span className="text-red-600 font-semibold">
-                    {book.price?.toLocaleString()}원
-                  </span>
+                  정가 <span className="line-through text-gray-400">{book.originalPrice?.toLocaleString()}원</span> →{' '}
+                  <span className="text-red-600 font-semibold">{book.price?.toLocaleString()}원</span>
                 </p>
+
                 <a
                   href={book.kmongUrl || "https://kmong.com"}
                   target="_blank"
@@ -286,6 +233,13 @@ function BookDetail() {
                 >
                   크몽에서 구매하기
                 </a>
+
+                <Link
+                  to={`/transfer-confirm?slug=${book.slug}`}
+                  className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center"
+                >
+                  홈페이지 구매
+                </Link>
               </div>
             </aside>
           )}
