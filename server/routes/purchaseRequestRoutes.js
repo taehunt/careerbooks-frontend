@@ -1,10 +1,8 @@
+// 파일 위치: server/routes/purchaseRequestRoutes.js
 import express from "express";
-import Book from "../models/Book.js";
-import User from "../models/User.js";
-import dotenv from "dotenv";
-import fetch from "node-fetch";
+import PurchaseRequest from "../models/PurchaseRequest.js";
+import { sendDiscordWebhook } from "../utils/discord.js"; // 선택사항
 
-dotenv.config();
 const router = express.Router();
 
 router.post("/", async (req, res) => {
@@ -15,25 +13,18 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    const book = await Book.findOne({ slug });
-    if (!book) {
-      return res.status(404).json({ message: "책을 찾을 수 없습니다." });
-    }
+    const request = await PurchaseRequest.create({ depositor, email, slug, memo });
 
-    const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-    if (webhookUrl) {
-      await fetch(webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: `📥 입금 신청\n\n- 입금자명: ${depositor}\n- 이메일: ${email}\n- 전자책: ${book.title} (${slug})\n- 메모: ${memo || "(없음)"}`,
-        }),
+    // 선택: Discord 알림
+    if (process.env.DISCORD_WEBHOOK_URL) {
+      await sendDiscordWebhook({
+        content: `💸 입금 신청 접수됨\n\n입금자: ${depositor}\n이메일: ${email}\n전자책: ${slug}\n메모: ${memo || "(없음)"}`,
       });
     }
 
-    res.json({ message: "신청 완료" });
+    res.status(201).json({ message: "입금 정보가 제출되었습니다." });
   } catch (err) {
-    console.error("입금 신청 오류:", err);
+    console.error("입금 신청 저장 실패:", err);
     res.status(500).json({ message: "서버 오류" });
   }
 });
