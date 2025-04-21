@@ -139,14 +139,54 @@ function BookDetail() {
                     무료 다운로드
                   </button>
                 ) : (
-                  <a
-                    href={book.kmongUrl || "https://kmong.com"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded shadow"
-                  >
-                    크몽에서 구매하기
-                  </a>
+                  <>
+                    <a
+                      href={book.kmongUrl || "https://kmong.com"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded shadow"
+                    >
+                      크몽에서 구매하기
+                    </a>
+
+                    {!hasAccess ? (
+                      <button
+                        onClick={async () => {
+                          const token =
+                            sessionStorage.getItem("token") ||
+                            localStorage.getItem("token");
+                          if (!token) {
+                            alert(
+                              "로그인이 필요합니다. 로그인 후 다시 시도해주세요."
+                            );
+                            navigate("/login");
+                            return;
+                          }
+                          try {
+                            await axios.post(
+                              `${API}/api/books/${slug}/purchase`,
+                              {},
+                              { headers: { Authorization: `Bearer ${token}` } }
+                            );
+                            alert("구매 완료");
+                            setHasAccess(true);
+                          } catch {
+                            alert("구매 오류");
+                          }
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded shadow"
+                      >
+                        홈페이지 결제 진행
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleDownload}
+                        className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded shadow"
+                      >
+                        다운로드
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             </div>
