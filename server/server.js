@@ -20,6 +20,9 @@ import slideRoutes from "./routes/slideRoutes.js";
 import User from "./models/User.js";
 import Book from "./models/Book.js";
 
+//Utils
+import purchaseRequestRoutes from "./routes/purchaseRequestRoutes.js";
+
 dotenv.config({ path: `.env.${process.env.NODE_ENV || "development"}` });
 
 const app = express();
@@ -80,6 +83,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/downloads", downloadRoutes);
+app.use("/api/purchase-requests", purchaseRequestRoutes);
 
 // 헬스 체크
 app.get("/api/ping", (req, res) => {
