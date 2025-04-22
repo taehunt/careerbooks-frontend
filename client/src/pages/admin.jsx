@@ -44,6 +44,9 @@ export default function Admin() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedBook, setSelectedBook] = useState(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   useEffect(() => {
     if (!isAuthChecked) return;
     const token =
@@ -81,18 +84,6 @@ export default function Admin() {
         navigate("/login");
       });
   }, [user, isAuthChecked, logout, navigate]);
-
-  const refreshBooks = async () => {
-    const token =
-      sessionStorage.getItem("token") || localStorage.getItem("token");
-
-    const res = await axios.get(`${API}/api/books`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    const data = Array.isArray(res.data) ? res.data : res.data.books;
-    setBooks(data.sort((a, b) => a.titleIndex - b.titleIndex));
-  };
 
   const uploadBook = async () => {
     const token =
@@ -217,6 +208,33 @@ export default function Admin() {
     }
   };
 
+  const refreshBooks = async () => {
+    const token =
+      sessionStorage.getItem("token") || localStorage.getItem("token");
+
+    const res = await axios.get(`${API}/api/books`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = Array.isArray(res.data) ? res.data : res.data.books;
+    setBooks(data.sort((a, b) => a.titleIndex - b.titleIndex));
+  };
+
+  const currentBooks = books.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(books.length / itemsPerPage);
+
+  const handlePageChange = (pageNum) => {
+    setCurrentPage(pageNum);
+  };
+
+  const tableContainerStyle = {
+    minHeight: `${itemsPerPage * 40}px`,
+  };
+
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-8">
       <h1 className="text-3xl font-bold mb-6">관리자 페이지</h1>
@@ -232,222 +250,240 @@ export default function Admin() {
 
         {bookCollapse && (
           <div className="space-y-12">
-            {/* 전자책 목록 테이블 */}
             <div>
               <h2 className="text-xl font-semibold mb-2">📘 전자책 목록</h2>
-              <table className="w-full border text-sm">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="p-2 border">Index</th>
-                    <th className="p-2 border">제목</th>
-                    <th className="p-2 border">Slug</th>
-                    <th className="p-2 border">카테고리</th>
-                    <th className="p-2 border">가격</th>
-                    <th className="p-2 border">정가</th>
-                    <th className="p-2 border">크몽</th>
-                    <th className="p-2 border">ZIP</th>
-                    <th className="p-2 border">관리</th>
-                    <th className="p-2 border">메일</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {books.map((book) => (
-                    <tr key={book._id}>
-                      <td className="border p-2">
-                        {editRowId === book._id ? (
-                          <input
-                            type="number"
-                            className="w-16 border px-1"
-                            value={editForm.titleIndex}
-                            onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                titleIndex: e.target.value,
-                              })
-                            }
-                          />
-                        ) : (
-                          book.titleIndex
-                        )}
-                      </td>
-                      <td className="border p-2">
-                        {editRowId === book._id ? (
-                          <input
-                            type="text"
-                            className="w-full border px-1"
-                            value={editForm.title}
-                            onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                title: e.target.value,
-                              })
-                            }
-                          />
-                        ) : (
-                          book.title
-                        )}
-                      </td>
-                      <td className="border p-2">{book.slug}</td>
-                      <td className="border p-2">
-                        {editRowId === book._id ? (
-                          <select
-                            className="border px-1"
-                            value={editForm.category}
-                            onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                category: e.target.value,
-                              })
-                            }
-                          >
-                            <option value="frontend">프론트엔드</option>
-                            <option value="backend">백엔드</option>
-                            <option value="design">웹디자인</option>
-                            <option value="planning">웹기획</option>
-                          </select>
-                        ) : (
-                          book.category
-                        )}
-                      </td>
-                      <td className="border p-2">
-                        {editRowId === book._id ? (
-                          <input
-                            type="number"
-                            className="w-20 border px-1"
-                            value={editForm.price}
-                            onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                price: e.target.value,
-                              })
-                            }
-                          />
-                        ) : (
-                          book.price
-                        )}
-                      </td>
-                      <td className="border p-2">
-                        {editRowId === book._id ? (
-                          <input
-                            type="number"
-                            className="w-20 border px-1"
-                            value={editForm.originalPrice}
-                            onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                originalPrice: e.target.value,
-                              })
-                            }
-                          />
-                        ) : (
-                          book.originalPrice
-                        )}
-                      </td>
-                      <td className="border p-2">
-                        {editRowId === book._id ? (
-                          <input
-                            type="text"
-                            className="w-full border px-1"
-                            value={editForm.kmongUrl}
-                            onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                kmongUrl: e.target.value,
-                              })
-                            }
-                          />
-                        ) : book.kmongUrl ? (
-                          <a
-                            href={book.kmongUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
-                          >
-                            링크
-                          </a>
-                        ) : (
-                          "-"
-                        )}
-                      </td>
-                      <td className="border p-2">
-                        {editRowId === book._id ? (
-                          <input
-                            type="text"
-                            className="w-full border px-1"
-                            value={editForm.fileName}
-                            onChange={(e) =>
-                              setEditForm({
-                                ...editForm,
-                                fileName: e.target.value,
-                              })
-                            }
-                          />
-                        ) : book.fileName ? (
-                          <span className="text-green-600 font-bold">✔</span>
-                        ) : (
-                          "-"
-                        )}
-                      </td>
-
-                      <td className="border p-2 space-x-2">
-                        {editRowId === book._id ? (
-                          <>
-                            <button
-                              onClick={() => saveEdit(book._id)}
-                              className="text-green-600 hover:underline"
-                            >
-                              저장
-                            </button>
-                            <button
-                              onClick={() => {
-                                setEditRowId(null);
-                                setEditForm({});
-                              }}
-                              className="text-gray-600 hover:underline"
-                            >
-                              취소
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => {
-                                setEditRowId(book._id);
-                                setEditForm({
-                                  title: book.title,
-                                  titleIndex: book.titleIndex,
-                                  category: book.category,
-                                  price: book.price,
-                                  originalPrice: book.originalPrice,
-                                  kmongUrl: book.kmongUrl || "",
-                                  fileName: book.fileName || "",
-                                });
-                              }}
-                              className="text-green-600 hover:underline"
-                            >
-                              수정
-                            </button>
-                            <button
-                              onClick={() => deleteBook(book._id)}
-                              className="text-red-600 hover:underline"
-                            >
-                              삭제
-                            </button>
-                          </>
-                        )}
-                      </td>
-                      <td className="border p-2 text-center">
-                        <button
-                          onClick={() => openEmailModal(book)}
-                          className="text-indigo-600 hover:underline"
-                        >
-                          메일 발송
-                        </button>
-                      </td>
+              <div style={tableContainerStyle}>
+                <table className="w-full border text-sm">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="p-2 border">Index</th>
+                      <th className="p-2 border">제목</th>
+                      <th className="p-2 border">Slug</th>
+                      <th className="p-2 border">카테고리</th>
+                      <th className="p-2 border">가격</th>
+                      <th className="p-2 border">정가</th>
+                      <th className="p-2 border">크몽</th>
+                      <th className="p-2 border">ZIP</th>
+                      <th className="p-2 border">관리</th>
+                      <th className="p-2 border">메일</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {currentBooks.map((book) => (
+                      <tr key={book._id}>
+                        <td className="border p-2">
+                          {editRowId === book._id ? (
+                            <input
+                              type="number"
+                              className="w-16 border px-1"
+                              value={editForm.titleIndex}
+                              onChange={(e) =>
+                                setEditForm({
+                                  ...editForm,
+                                  titleIndex: e.target.value,
+                                })
+                              }
+                            />
+                          ) : (
+                            book.titleIndex
+                          )}
+                        </td>
+                        <td className="border p-2">
+                          {editRowId === book._id ? (
+                            <input
+                              type="text"
+                              className="w-full border px-1"
+                              value={editForm.title}
+                              onChange={(e) =>
+                                setEditForm({
+                                  ...editForm,
+                                  title: e.target.value,
+                                })
+                              }
+                            />
+                          ) : (
+                            book.title
+                          )}
+                        </td>
+                        <td className="border p-2">{book.slug}</td>
+                        <td className="border p-2">
+                          {editRowId === book._id ? (
+                            <select
+                              className="border px-1"
+                              value={editForm.category}
+                              onChange={(e) =>
+                                setEditForm({
+                                  ...editForm,
+                                  category: e.target.value,
+                                })
+                              }
+                            >
+                              <option value="frontend">프론트엔드</option>
+                              <option value="backend">백엔드</option>
+                              <option value="design">웹디자인</option>
+                              <option value="planning">웹기획</option>
+                            </select>
+                          ) : (
+                            book.category
+                          )}
+                        </td>
+                        <td className="border p-2">
+                          {editRowId === book._id ? (
+                            <input
+                              type="number"
+                              className="w-20 border px-1"
+                              value={editForm.price}
+                              onChange={(e) =>
+                                setEditForm({
+                                  ...editForm,
+                                  price: e.target.value,
+                                })
+                              }
+                            />
+                          ) : (
+                            book.price
+                          )}
+                        </td>
+                        <td className="border p-2">
+                          {editRowId === book._id ? (
+                            <input
+                              type="number"
+                              className="w-20 border px-1"
+                              value={editForm.originalPrice}
+                              onChange={(e) =>
+                                setEditForm({
+                                  ...editForm,
+                                  originalPrice: e.target.value,
+                                })
+                              }
+                            />
+                          ) : (
+                            book.originalPrice
+                          )}
+                        </td>
+                        <td className="border p-2">
+                          {editRowId === book._id ? (
+                            <input
+                              type="text"
+                              className="w-full border px-1"
+                              value={editForm.kmongUrl}
+                              onChange={(e) =>
+                                setEditForm({
+                                  ...editForm,
+                                  kmongUrl: e.target.value,
+                                })
+                              }
+                            />
+                          ) : book.kmongUrl ? (
+                            <a
+                              href={book.kmongUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:underline"
+                            >
+                              링크
+                            </a>
+                          ) : (
+                            "-"
+                          )}
+                        </td>
+                        <td className="border p-2">
+                          {editRowId === book._id ? (
+                            <input
+                              type="text"
+                              className="w-full border px-1"
+                              value={editForm.fileName}
+                              onChange={(e) =>
+                                setEditForm({
+                                  ...editForm,
+                                  fileName: e.target.value,
+                                })
+                              }
+                            />
+                          ) : book.fileName ? (
+                            <span className="text-green-600 font-bold">✔</span>
+                          ) : (
+                            "-"
+                          )}
+                        </td>
+
+                        <td className="border p-2 space-x-2">
+                          {editRowId === book._id ? (
+                            <>
+                              <button
+                                onClick={() => saveEdit(book._id)}
+                                className="text-green-600 hover:underline"
+                              >
+                                저장
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditRowId(null);
+                                  setEditForm({});
+                                }}
+                                className="text-gray-600 hover:underline"
+                              >
+                                취소
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => {
+                                  setEditRowId(book._id);
+                                  setEditForm({
+                                    title: book.title,
+                                    titleIndex: book.titleIndex,
+                                    category: book.category,
+                                    price: book.price,
+                                    originalPrice: book.originalPrice,
+                                    kmongUrl: book.kmongUrl || "",
+                                    fileName: book.fileName || "",
+                                  });
+                                }}
+                                className="text-green-600 hover:underline"
+                              >
+                                수정
+                              </button>
+                              <button
+                                onClick={() => deleteBook(book._id)}
+                                className="text-red-600 hover:underline"
+                              >
+                                삭제
+                              </button>
+                            </>
+                          )}
+                        </td>
+                        <td className="border p-2 text-center">
+                          <button
+                            onClick={() => openEmailModal(book)}
+                            className="text-indigo-600 hover:underline"
+                          >
+                            메일 발송
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="flex justify-center mt-4 space-x-2">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (n) => (
+                    <button
+                      key={n}
+                      onClick={() => handlePageChange(n)}
+                      className={`px-3 py-1 rounded border ${
+                        currentPage === n
+                          ? "bg-blue-500 text-white"
+                          : "bg-white"
+                      }`}
+                    >
+                      {n}
+                    </button>
+                  )
+                )}
+              </div>
             </div>
 
             {/* 전자책 설명 수정 버튼 */}
