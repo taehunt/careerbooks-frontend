@@ -228,26 +228,6 @@ export default function Admin() {
     }
   };
 
-  const openEmailModal = async (book) => {
-    setTargetBook(book);
-    try {
-      const token =
-        sessionStorage.getItem("token") || localStorage.getItem("token");
-      const res = await axios.get(
-        `${API}/api/admin/user-by-book/${book.slug}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setTargetUserEmail(res.data.email || "");
-      setManualEmail(res.data.email || "");
-      setShowEmailModal(true);
-    } catch (err) {
-      console.error("이메일 불러오기 실패:", err);
-      alert("해당 책을 구매한 유저의 이메일을 찾을 수 없습니다.");
-    }
-  };
-
   const sendZipByEmail = async () => {
     try {
       await axios.post(`${API}/api/email/send`, {
@@ -292,72 +272,6 @@ export default function Admin() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-8">
-      {showEmailModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-2xl space-y-4">
-            <h2 className="text-xl font-bold">📧 이메일 발송</h2>
-
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={handleSearch}
-              placeholder="회원 ID 또는 닉네임 검색"
-              className="w-full border p-2 rounded"
-            />
-
-            <div className="max-h-40 overflow-auto border p-2 rounded mt-2">
-              {filteredUsers.map((user) => (
-                <label key={user._id} className="block">
-                  <input
-                    type="checkbox"
-                    checked={selectedUsersForEmail.some(
-                      (u) => u._id === user._id
-                    )}
-                    onChange={() => toggleUserSelection(user)}
-                    className="mr-2"
-                  />
-                  {user.userId} ({user.nickname})
-                </label>
-              ))}
-            </div>
-
-            <div className="space-y-2">
-              {selectedUsersForEmail.map((user) => (
-                <div key={user._id} className="flex items-center space-x-2">
-                  <span className="w-32 text-sm">{user.userId}</span>
-                  <input
-                    type="email"
-                    value={manualEmails[user._id] || ""}
-                    onChange={(e) =>
-                      setManualEmails({
-                        ...manualEmails,
-                        [user._id]: e.target.value,
-                      })
-                    }
-                    className="flex-1 border p-2 rounded"
-                  />
-                </div>
-              ))}
-            </div>
-
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={() => setShowEmailModal(false)}
-                className="px-4 py-2 border rounded"
-              >
-                취소
-              </button>
-              <button
-                onClick={sendBulkEmail}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded"
-              >
-                이메일 발송
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <h1 className="text-3xl font-bold mb-6">관리자 페이지</h1>
 
       {/* 전자책 관리 섹션 */}
@@ -386,7 +300,6 @@ export default function Admin() {
                       <th className="p-2 border">크몽</th>
                       <th className="p-2 border">ZIP</th>
                       <th className="p-2 border">관리</th>
-                      <th className="p-2 border">메일</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -575,14 +488,6 @@ export default function Admin() {
                             </>
                           )}
                         </td>
-                        <td className="border p-2 text-center">
-                          <button
-                            onClick={() => openEmailModal(book)}
-                            className="text-indigo-600 hover:underline"
-                          >
-                            메일 발송
-                          </button>
-                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -682,7 +587,84 @@ export default function Admin() {
             </div>
           </div>
         )}
+
+        {/* 메일 발송 섹션 */}
+        <section className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">✉️ 이메일 대량 발송</h2>
+          <button
+            onClick={() => setShowEmailModal(true)}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded text-sm"
+          >
+            📧 이메일 발송
+          </button>
+        </section>
       </section>
+
+      {showEmailModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-2xl space-y-4">
+            <h2 className="text-xl font-bold">📧 이메일 발송</h2>
+
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearch}
+              placeholder="회원 ID 또는 닉네임 검색"
+              className="w-full border p-2 rounded"
+            />
+
+            <div className="max-h-40 overflow-auto border p-2 rounded mt-2">
+              {filteredUsers.map((user) => (
+                <label key={user._id} className="block">
+                  <input
+                    type="checkbox"
+                    checked={selectedUsersForEmail.some(
+                      (u) => u._id === user._id
+                    )}
+                    onChange={() => toggleUserSelection(user)}
+                    className="mr-2"
+                  />
+                  {user.userId} ({user.nickname})
+                </label>
+              ))}
+            </div>
+
+            <div className="space-y-2">
+              {selectedUsersForEmail.map((user) => (
+                <div key={user._id} className="flex items-center space-x-2">
+                  <span className="w-32 text-sm">{user.userId}</span>
+                  <input
+                    type="email"
+                    value={manualEmails[user._id] || ""}
+                    onChange={(e) =>
+                      setManualEmails({
+                        ...manualEmails,
+                        [user._id]: e.target.value,
+                      })
+                    }
+                    className="flex-1 border p-2 rounded"
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setShowEmailModal(false)}
+                className="px-4 py-2 border rounded"
+              >
+                취소
+              </button>
+              <button
+                onClick={sendBulkEmail}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded"
+              >
+                이메일 발송
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 회원 관리 섹션 */}
       <section>
