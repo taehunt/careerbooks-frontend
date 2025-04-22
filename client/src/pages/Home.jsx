@@ -30,16 +30,29 @@ function Home() {
 
   return (
     <div className="bg-white">
+      {/* ✅ 랜딩 헤드라인 */}
+      <div className="bg-blue-50 py-12 px-4 sm:px-6 lg:px-8 text-center">
+        <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+          비전공자도 가능한 실전 웹 개발 전자책
+        </h1>
+        <p className="text-lg text-gray-700 mb-6">
+          개발 1도 몰라도 OK! 따라만 하면 포트폴리오 완성까지<br className="hidden sm:inline" />
+          커리어 전환, 이직, 사이드 프로젝트까지 한 번에!
+        </p>
+        <Link
+          to="/books"
+          className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 transition transform hover:scale-105"
+        >
+          전자책 둘러보기
+        </Link>
+      </div>
+
       {/* ✅ 메인 슬라이드 영역 */}
       <MainSlider />
 
       {/* 🔥 광고 유입용 CTA 배너 */}
       <div className="bg-yellow-100 border border-yellow-300 text-center text-sm text-gray-800 px-4 py-3 rounded-md shadow mt-6 mx-4 max-w-6xl mx-auto">
-        🎯{" "}
-        <span className="font-semibold text-red-600">
-          총집합 패키지 50% 할인 중!
-        </span>{" "}
-        생초보도 홈페이지 개발 OK! 지금 시작해보세요.
+        🎯 <span className="font-semibold text-red-600">총집합 패키지 50% 할인 중!</span> 생초보도 홈페이지 개발 OK! 지금 시작해보세요.
       </div>
 
       {/* 인기 전자책 섹션 */}
@@ -74,9 +87,7 @@ function Home() {
                     <span className="ml-2 text-sm text-green-600">
                       (
                       {Math.round(
-                        ((book.originalPrice - book.price) /
-                          book.originalPrice) *
-                          100
+                        ((book.originalPrice - book.price) / book.originalPrice) * 100
                       )}
                       % 할인)
                     </span>
@@ -122,8 +133,7 @@ function Home() {
       {/* ✅ 무료 전자책 섹션 (PC용) */}
       <div className="hidden md:block bg-white border rounded-xl shadow p-6 text-center hover:shadow-lg transition">
         <p className="text-lg text-gray-700 mb-4">
-          프론트엔드 개발 비전공자를 위한 입문서! 아래 버튼을 눌러 무료 전자책을
-          받아보세요.
+          프론트엔드 개발 비전공자를 위한 입문서! 아래 버튼을 눌러 무료 전자책을 받아보세요.
         </p>
         <button
           onClick={() => {
