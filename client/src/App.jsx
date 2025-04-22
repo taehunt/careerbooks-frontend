@@ -28,6 +28,7 @@ import RequireAuth from "./components/RequireAuth";
 import RedirectIfAuth from "./components/RedirectIfAuth";
 import AdminRoute from "./components/AdminRoute";
 import ScrollToTop from "./components/ScrollToTop";
+import Footer from "./components/Footer";
 
 function App() {
   const { isAuthChecked } = useContext(AuthContext);
@@ -104,6 +105,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+	  <Footer />
     </>
   );
 }

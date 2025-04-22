@@ -25,7 +25,8 @@ export default function TransferConfirm() {
   useEffect(() => {
     setForm((prev) => ({ ...prev, slug }));
 
-    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+    const token =
+      sessionStorage.getItem("token") || localStorage.getItem("token");
     if (!token || !user || !slug) return;
 
     axios
@@ -45,7 +46,8 @@ export default function TransferConfirm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+    const token =
+      sessionStorage.getItem("token") || localStorage.getItem("token");
     try {
       await axios.post(`${API}/api/purchase-requests`, form, {
         headers: { Authorization: `Bearer ${token}` },
@@ -57,7 +59,9 @@ export default function TransferConfirm() {
   };
 
   if (!isAuthChecked) {
-    return <div className="text-center mt-10 text-gray-500">로그인 확인 중...</div>;
+    return (
+      <div className="text-center mt-10 text-gray-500">로그인 확인 중...</div>
+    );
   }
 
   return (
@@ -91,6 +95,13 @@ export default function TransferConfirm() {
             placeholder="이메일 주소"
             required
             className="w-full border px-3 py-2 rounded"
+          />
+          <input
+            type="text"
+            name="slug"
+            value={form.slug}
+            readOnly
+            className="w-full border px-3 py-2 rounded bg-gray-100 text-gray-600"
           />
           <textarea
             name="memo"
