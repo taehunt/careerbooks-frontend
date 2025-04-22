@@ -14,6 +14,9 @@ export default function Admin() {
 
   const [books, setBooks] = useState([]);
   const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [selectedUsersForEmail, setSelectedUsersForEmail] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [editRowId, setEditRowId] = useState(null);
   const [editForm, setEditForm] = useState({});
@@ -31,21 +34,23 @@ export default function Admin() {
   const [bookCollapse, setBookCollapse] = useState(true);
   const [userCollapse, setUserCollapse] = useState(false);
 
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [manualEmails, setManualEmails] = useState({});
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const [showDescModal, setShowDescModal] = useState(false);
   const [descSlug, setDescSlug] = useState("");
   const [descContent, setDescContent] = useState("");
   const [descLoading, setDescLoading] = useState(false);
 
-  const [showEmailModal, setShowEmailModal] = useState(false);
   const [targetBook, setTargetBook] = useState(null);
   const [targetUserEmail, setTargetUserEmail] = useState("");
   const [manualEmail, setManualEmail] = useState("");
 
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedBook, setSelectedBook] = useState(null);
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
 
   useEffect(() => {
     if (!isAuthChecked) return;
@@ -76,7 +81,10 @@ export default function Admin() {
       .get(`${API}/api/admin/users`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => setUsers(res.data))
+      .then((res) => {
+        setUsers(res.data);
+        setFilteredUsers(res.data);
+      })
       .catch((err) => {
         console.error("👥 회원 목록 불러오기 실패", err);
         alert("세션이 만료되었습니다. 다시 로그인해주세요.");
@@ -84,6 +92,53 @@ export default function Admin() {
         navigate("/login");
       });
   }, [user, isAuthChecked, logout, navigate]);
+
+  const handleSearch = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+    const filtered = users.filter(
+      (u) =>
+        u.userId.toLowerCase().includes(query) ||
+        u.nickname?.toLowerCase().includes(query)
+    );
+    setFilteredUsers(filtered);
+  };
+
+  const toggleUserSelection = (user) => {
+    setSelectedUsersForEmail((prev) => {
+      const exists = prev.find((u) => u._id === user._id);
+      if (exists) {
+        const updated = prev.filter((u) => u._id !== user._id);
+        const newEmails = { ...manualEmails };
+        delete newEmails[user._id];
+        setManualEmails(newEmails);
+        return updated;
+      } else {
+        setManualEmails((prevEmails) => ({
+          ...prevEmails,
+          [user._id]: user.email || "",
+        }));
+        return [...prev, user];
+      }
+    });
+  };
+
+  const sendBulkEmail = async () => {
+    try {
+      const payload = selectedUsersForEmail.map((user) => ({
+        userId: user._id,
+        email: manualEmails[user._id] || user.email,
+      }));
+      await axios.post(`${API}/api/email/send-bulk`, payload);
+      alert("✅ 이메일이 발송되었습니다.");
+      setShowEmailModal(false);
+      setSelectedUsersForEmail([]);
+      setManualEmails({});
+    } catch (err) {
+      console.error("이메일 발송 실패", err);
+      alert("❌ 이메일 발송 실패");
+    }
+  };
 
   const uploadBook = async () => {
     const token =
@@ -237,6 +292,72 @@ export default function Admin() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-8">
+      {showEmailModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-2xl space-y-4">
+            <h2 className="text-xl font-bold">📧 이메일 발송</h2>
+
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearch}
+              placeholder="회원 ID 또는 닉네임 검색"
+              className="w-full border p-2 rounded"
+            />
+
+            <div className="max-h-40 overflow-auto border p-2 rounded mt-2">
+              {filteredUsers.map((user) => (
+                <label key={user._id} className="block">
+                  <input
+                    type="checkbox"
+                    checked={selectedUsersForEmail.some(
+                      (u) => u._id === user._id
+                    )}
+                    onChange={() => toggleUserSelection(user)}
+                    className="mr-2"
+                  />
+                  {user.userId} ({user.nickname})
+                </label>
+              ))}
+            </div>
+
+            <div className="space-y-2">
+              {selectedUsersForEmail.map((user) => (
+                <div key={user._id} className="flex items-center space-x-2">
+                  <span className="w-32 text-sm">{user.userId}</span>
+                  <input
+                    type="email"
+                    value={manualEmails[user._id] || ""}
+                    onChange={(e) =>
+                      setManualEmails({
+                        ...manualEmails,
+                        [user._id]: e.target.value,
+                      })
+                    }
+                    className="flex-1 border p-2 rounded"
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setShowEmailModal(false)}
+                className="px-4 py-2 border rounded"
+              >
+                취소
+              </button>
+              <button
+                onClick={sendBulkEmail}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded"
+              >
+                이메일 발송
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <h1 className="text-3xl font-bold mb-6">관리자 페이지</h1>
 
       {/* 전자책 관리 섹션 */}
