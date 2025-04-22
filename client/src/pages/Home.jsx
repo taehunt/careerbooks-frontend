@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import MainSlider from "../components/MainSlider";
 
-axios.defaults.withCredentials = true;  // ★ 추가된 부분
+axios.defaults.withCredentials = true; // ★ 추가된 부분
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const UPLOADS = import.meta.env.VITE_UPLOADS_URL;
@@ -32,6 +32,15 @@ function Home() {
     <div className="bg-white">
       {/* ✅ 메인 슬라이드 영역 */}
       <MainSlider />
+
+      {/* 🔥 광고 유입용 CTA 배너 */}
+      <div className="bg-yellow-100 border border-yellow-300 text-center text-sm text-gray-800 px-4 py-3 rounded-md shadow mt-6 mx-4 max-w-6xl mx-auto">
+        🎯{" "}
+        <span className="font-semibold text-red-600">
+          총집합 패키지 50% 할인 중!
+        </span>{" "}
+        생초보도 홈페이지 개발 OK! 지금 시작해보세요.
+      </div>
 
       {/* 인기 전자책 섹션 */}
       <div className="max-w-6xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
