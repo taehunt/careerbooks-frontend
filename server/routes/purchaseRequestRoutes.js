@@ -1,4 +1,5 @@
 import express from "express";
+import jwt from "jsonwebtoken";
 import PurchaseRequest from "../models/PurchaseRequest.js";
 import { sendDiscordWebhook } from "../utils/discord.js";
 
@@ -11,13 +12,21 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ message: "필수 항목이 누락되었습니다." });
   }
 
-  try {
-    const request = await PurchaseRequest.create({ depositor, email, slug, memo });
-
-    let userInfoText = "";
-    if (req.user) {
-      userInfoText = `\n🆔 사용자 ID: ${req.user.userId}\n👤 닉네임: ${req.user.nickname}`;
+  // 👤 사용자 정보 추출 (optional)
+  let userInfoText = "";
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.split(" ")[1];
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      userInfoText = `\n🧑 사용자 ID: ${decoded.userId}\n🏷 닉네임: ${decoded.nickname}`;
+    } catch (err) {
+      console.warn("⚠️ 유저 토큰 디코딩 실패 (무시됨):", err.message);
     }
+  }
+
+  try {
+    await PurchaseRequest.create({ depositor, email, slug, memo });
 
     await sendDiscordWebhook({
       depositor,
@@ -33,3 +42,5 @@ router.post("/", async (req, res) => {
     res.status(500).json({ message: "서버 오류" });
   }
 });
+
+export default router;
