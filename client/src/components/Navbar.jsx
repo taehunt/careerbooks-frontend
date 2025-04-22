@@ -68,6 +68,10 @@ function Navbar() {
             홈
           </Link>
 
+          <Link to="/about" className="hover:text-blue-500 navMenu block py-2">
+            소개
+          </Link>
+
           {/* 전자책 hover 드롭다운 */}
           <div className="relative group">
             <div className="hover:text-blue-500 navMenu block py-2 cursor-pointer">
@@ -157,6 +161,14 @@ function Navbar() {
               onClick={() => setMenuOpen(false)}
             >
               홈
+            </Link>
+
+            <Link
+              to="/about"
+              className="block py-2"
+              onClick={() => setMenuOpen(false)}
+            >
+              소개
             </Link>
 
             <div>

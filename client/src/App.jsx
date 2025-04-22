@@ -17,6 +17,7 @@ import BookList from "./pages/BookList";
 import BookCategories from "./pages/BookCategories";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import TransferConfirm from "./pages/TransferConfirm";
+import About from "./pages/About";
 
 // 관리자 페이지
 import Admin from "./pages/admin";
@@ -49,6 +50,7 @@ function App() {
         <Routes>
           {/* 일반 유저 접근 */}
           <Route path="/" element={<Home />} />
+		  <Route path="/about" element={<About />} />
           <Route path="/books" element={<BookList />} />
           <Route path="/books/categories" element={<BookCategories />} />
           <Route path="/books/:slug" element={<BookDetail />} />
