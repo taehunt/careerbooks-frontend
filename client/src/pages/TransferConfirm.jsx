@@ -19,6 +19,7 @@ export default function TransferConfirm() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [alreadyOwned, setAlreadyOwned] = useState(false);
+  const [book, setBook] = useState(null);
 
   const BANK_INFO = {
     bankName: "IBK기업은행",
@@ -42,6 +43,15 @@ export default function TransferConfirm() {
       })
       .catch(() => {});
   }, [slug, user]);
+
+  // 📌 책 정보 불러오기
+  useEffect(() => {
+    if (!slug) return;
+
+    axios.get(`${API}/api/books/${slug}`)
+      .then(res => setBook(res.data))
+      .catch(() => {});
+  }, [slug]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -84,12 +94,14 @@ export default function TransferConfirm() {
         <>
           <div className="bg-yellow-100 border-l-4 border-yellow-400 p-4 text-sm text-gray-800 rounded">
             <p className="font-semibold mb-1">💳 입금 계좌 정보</p>
-            <p>은행명: <span className="font-bold">{BANK_INFO.bankName}</span></p>
-            <p>계좌번호: <span className="font-bold">{BANK_INFO.account}</span></p>
-            <p>예금주: <span className="font-bold">{BANK_INFO.holder}</span></p>
+            <p>은행명 : <span className="font-bold">{BANK_INFO.bankName}</span></p>
+            <p>계좌번호 : <span className="font-bold">{BANK_INFO.account}</span></p>
+            <p>예금주 : <span className="font-bold">{BANK_INFO.holder}</span></p>
+            <p>금액 : <span className="font-bold">
+              {book ? `${book.price.toLocaleString()}원` : "로딩 중..."}</span></p>
             <p className="mt-2 text-gray-600">
-              입금 후 아래 양식에 맞게 정보를 제출해주세요.<br/>
-			  입금확인 후 아래 이메일로 전자책이 발송됩니다 :)
+              입금 후 아래 양식에 맞게 정보를 제출해주세요.<br />
+              입금확인 후 아래 이메일로 전자책이 발송됩니다 :)
             </p>
           </div>
 
