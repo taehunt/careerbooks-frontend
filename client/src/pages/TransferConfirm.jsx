@@ -1,5 +1,3 @@
-// 파일 경로: client/src/pages/TransferConfirm.jsx
-
 import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useSearchParams } from "react-router-dom";
@@ -21,6 +19,12 @@ export default function TransferConfirm() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [alreadyOwned, setAlreadyOwned] = useState(false);
+
+  const BANK_INFO = {
+    bankName: "IBK기업은행",
+    account: "688-014027-01-011",
+    holder: "장태훈",
+  };
 
   useEffect(() => {
     setForm((prev) => ({ ...prev, slug }));
@@ -77,46 +81,59 @@ export default function TransferConfirm() {
           제출이 완료되었습니다. 확인 후 발송드리겠습니다.
         </p>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <input
-            type="text"
-            name="depositor"
-            value={form.depositor}
-            onChange={handleChange}
-            placeholder="입금자명"
-            required
-            className="w-full border px-3 py-2 rounded"
-          />
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            placeholder="이메일 주소"
-            required
-            className="w-full border px-3 py-2 rounded"
-          />
-          <input
-            type="text"
-            name="slug"
-            value={form.slug}
-            readOnly
-            className="w-full border px-3 py-2 rounded bg-gray-100 text-gray-600"
-          />
-          <textarea
-            name="memo"
-            value={form.memo}
-            onChange={handleChange}
-            placeholder="기타 메모 (선택)"
-            className="w-full border px-3 py-2 rounded"
-          />
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded"
-          >
-            제출하기
-          </button>
-        </form>
+        <>
+          <div className="bg-yellow-100 border-l-4 border-yellow-400 p-4 text-sm text-gray-800 rounded">
+            <p className="font-semibold mb-1">💳 입금 계좌 정보</p>
+            <p>은행명: <span className="font-bold">{BANK_INFO.bankName}</span></p>
+            <p>계좌번호: <span className="font-bold">{BANK_INFO.account}</span></p>
+            <p>예금주: <span className="font-bold">{BANK_INFO.holder}</span></p>
+            <p className="mt-2 text-gray-600">
+              입금 후 아래 양식에 맞게 정보를 제출해주세요.<br/>
+			  입금확인 후 아래 이메일로 전자책이 발송됩니다 :)
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <input
+              type="text"
+              name="depositor"
+              value={form.depositor}
+              onChange={handleChange}
+              placeholder="입금자명"
+              required
+              className="w-full border px-3 py-2 rounded"
+            />
+            <input
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="이메일 주소"
+              required
+              className="w-full border px-3 py-2 rounded"
+            />
+            <input
+              type="text"
+              name="slug"
+              value={form.slug}
+              readOnly
+              className="w-full border px-3 py-2 rounded bg-gray-100 text-gray-600"
+            />
+            <textarea
+              name="memo"
+              value={form.memo}
+              onChange={handleChange}
+              placeholder="기타 메모 (선택)"
+              className="w-full border px-3 py-2 rounded"
+            />
+            <button
+              type="submit"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded"
+            >
+              제출하기
+            </button>
+          </form>
+        </>
       )}
     </div>
   );
