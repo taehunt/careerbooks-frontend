@@ -1,11 +1,10 @@
-// 파일 경로: root/client/src/pages/BookList.jsx
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
 
 axios.defaults.withCredentials = true;
 const API = import.meta.env.VITE_API_BASE_URL;
+const UPLOADS = import.meta.env.VITE_UPLOADS_URL;
 
 export default function BookList() {
   const [books, setBooks] = useState([]);
@@ -32,24 +31,17 @@ export default function BookList() {
 
     axios
       .get(`${API}/api/books?${params.toString()}`)
-      .then((res) => {
-        // ✅ 서버에서 books 배열만 응답할 경우 (pagination 없이)
-        setBooks(res.data);
-      })
+      .then((res) => setBooks(res.data))
       .catch((err) => console.error("도서 목록 불러오기 실패:", err));
   }, [category]);
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-6xl mx-auto px-4 py-10 space-y-12">
       {/* 상단 경로 */}
       <div className="text-sm text-blue-600 mb-4 space-x-1">
-        <Link to="/" className="hover:underline">
-          홈
-        </Link>
+        <Link to="/" className="hover:underline">홈</Link>
         <span>&gt;</span>
-        <Link to="/books" className="hover:underline">
-          전자책 목록
-        </Link>
+        <Link to="/books" className="hover:underline">전자책 목록</Link>
         {category && (
           <>
             <span>&gt;</span>
@@ -62,50 +54,68 @@ export default function BookList() {
 
       <h1 className="text-3xl font-bold text-gray-800">전자책 목록</h1>
 
-      {/* 리스트 렌더링 */}
-      <div className="space-y-4">
-        {books.length === 0 ? (
-          <p className="text-gray-500">등록된 전자책이 없습니다.</p>
-        ) : (
-          books.map((book) => (
+      {books.length === 0 ? (
+        <p className="text-gray-500">등록된 전자책이 없습니다.</p>
+      ) : (
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {books.map((book) => (
             <div
               key={book.slug}
-              className="bg-white shadow rounded-lg p-6 mb-4 transition hover:shadow-lg hover:-translate-y-1"
+              className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 border border-gray-100"
             >
-              <h2 className="text-xl font-semibold text-blue-600">
-                {book.titleIndex}. {book.title}
-              </h2>
-              <p className="font-semibold text-blue-600 mb-6 text-lg">
-                {book.originalPrice && book.originalPrice > book.price ? (
-                  <>
-                    <span className="line-through text-gray-400 mr-2 text-base">
-                      {book.originalPrice.toLocaleString()}원
+              <img
+                src={`${UPLOADS}/${book.slug}_preview01.png`}
+                alt={`${book.title} 미리보기`}
+                className="w-full h-44 object-cover rounded-t-2xl"
+              />
+              <div className="p-6 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base font-semibold text-blue-600 line-clamp-2">
+                    {book.titleIndex}. {book.title}
+                  </h2>
+                  {book.titleIndex === 0 && (
+                    <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full font-medium">
+                      무료
                     </span>
-                    <span className="text-red-600 font-bold">
-                      {book.price.toLocaleString()}원
-                    </span>
-                    <span className="ml-2 text-sm text-green-600">
-                      (
-                      {Math.round(
-                        ((book.originalPrice - book.price) / book.originalPrice) * 100
-                      )}
-                      % 할인)
-                    </span>
-                  </>
-                ) : (
-                  <>{book.price.toLocaleString()}원</>
-                )}
-              </p>
-              <Link
-                to={`/books/${book.slug}`}
-                className="inline-block mt-4 text-sm text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition"
-              >
-                자세히 보기
-              </Link>
+                  )}
+                </div>
+
+                <p className="text-sm text-gray-600 h-10 line-clamp-2">
+                  {book.description}
+                </p>
+
+                <div className="text-lg font-bold text-blue-600">
+                  {book.originalPrice && book.originalPrice > book.price ? (
+                    <>
+                      <span className="line-through text-gray-400 mr-2 text-base">
+                        {book.originalPrice.toLocaleString()}원
+                      </span>
+                      <span className="text-red-600 font-bold">
+                        {book.price.toLocaleString()}원
+                      </span>
+                      <span className="ml-2 text-sm text-green-600">
+                        ({Math.round(
+                          ((book.originalPrice - book.price) / book.originalPrice) * 100
+                        )}%
+                        할인)
+                      </span>
+                    </>
+                  ) : (
+                    <>{book.price.toLocaleString()}원</>
+                  )}
+                </div>
+
+                <Link
+                  to={`/books/${book.slug}`}
+                  className="block w-full text-center mt-4 text-sm text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition"
+                >
+                  자세히 보기
+                </Link>
+              </div>
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
