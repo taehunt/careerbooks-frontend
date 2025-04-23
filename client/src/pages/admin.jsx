@@ -200,17 +200,6 @@ export default function Admin() {
     }
   };
 
-  useEffect(() => {
-    if (!descSlug) return;
-
-    setDescLoading(true);
-    axios
-      .get(`${API}/api/books/${descSlug}/description`)
-      .then((res) => setDescContent(res.data.description || ""))
-      .catch((err) => console.error("설명 불러오기 실패", err))
-      .finally(() => setDescLoading(false));
-  }, [descSlug]);
-
   const handleDescSave = async () => {
     try {
       const token =
