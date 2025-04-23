@@ -52,6 +52,8 @@ export default function Admin() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedBook, setSelectedBook] = useState(null);
 
+  const [serviceDetail, setServiceDetail] = useState("");
+
   useEffect(() => {
     if (!isAuthChecked) return;
     const token =
@@ -827,12 +829,29 @@ export default function Admin() {
       {/* 설명 수정 모달 */}
       {showDescModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-xl max-h-[80vh] overflow-auto">
+          <div className="bg-white p-6 rounded-lg w-full max-w-xl max-h-[90vh] overflow-auto">
             <h2 className="text-xl font-bold mb-4">전자책 설명 수정</h2>
 
             <select
               value={descSlug}
-              onChange={(e) => setDescSlug(e.target.value)}
+              onChange={async (e) => {
+                const newSlug = e.target.value;
+                setDescSlug(newSlug);
+                setDescLoading(true);
+
+                try {
+                  const [bookRes, serviceRes] = await Promise.all([
+                    axios.get(`${API}/api/books/${newSlug}`),
+                    axios.get(`${API}/api/books/${newSlug}/service`),
+                  ]);
+                  setDescContent(bookRes.data.description || "");
+                  setServiceDetail(serviceRes.data.serviceDetail || "");
+                } catch (err) {
+                  console.error("설명 불러오기 실패:", err);
+                } finally {
+                  setDescLoading(false);
+                }
+              }}
               className="w-full mb-4 border p-2 rounded"
             >
               <option value="">— 전자책 선택 —</option>
@@ -846,12 +865,26 @@ export default function Admin() {
             {descLoading ? (
               <p>로딩 중…</p>
             ) : (
-              <textarea
-                value={descContent}
-                onChange={(e) => setDescContent(e.target.value)}
-                rows={10}
-                className="w-full border p-2 rounded mb-4 whitespace-pre-wrap"
-              />
+              <>
+                <label className="text-sm font-semibold text-gray-700 block mb-1">
+                  📌 부제목 (1줄 요약)
+                </label>
+                <input
+                  value={descContent}
+                  onChange={(e) => setDescContent(e.target.value)}
+                  className="w-full border p-2 rounded mb-4"
+                />
+
+                <label className="text-sm font-semibold text-gray-700 block mb-1">
+                  📖 서비스 설명 (HTML/Markdown 가능)
+                </label>
+                <textarea
+                  value={serviceDetail}
+                  onChange={(e) => setServiceDetail(e.target.value)}
+                  rows={10}
+                  className="w-full border p-2 rounded mb-4"
+                />
+              </>
             )}
 
             <div className="flex justify-end space-x-2">
@@ -862,7 +895,33 @@ export default function Admin() {
                 취소
               </button>
               <button
-                onClick={handleDescSave}
+                onClick={async () => {
+                  const token =
+                    sessionStorage.getItem("token") ||
+                    localStorage.getItem("token");
+                  try {
+                    await axios.put(
+                      `${API}/api/books/${descSlug}`,
+                      { description: descContent },
+                      { headers: { Authorization: `Bearer ${token}` } }
+                    );
+
+                    await axios.put(
+                      `${API}/api/books/${descSlug}/service`,
+                      { serviceDetail },
+                      { headers: { Authorization: `Bearer ${token}` } }
+                    );
+
+                    alert("✅ 설명이 저장되었습니다.");
+                    setShowDescModal(false);
+                    setDescSlug("");
+                    setDescContent("");
+                    setServiceDetail("");
+                  } catch (err) {
+                    console.error("저장 실패", err);
+                    alert("설명 저장 중 오류 발생");
+                  }
+                }}
                 disabled={!descSlug}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded disabled:opacity-50"
               >

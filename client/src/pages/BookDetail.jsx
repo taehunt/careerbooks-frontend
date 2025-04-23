@@ -51,7 +51,8 @@ function BookDetail() {
 
   const handleDownload = async () => {
     try {
-      const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+      const token =
+        sessionStorage.getItem("token") || localStorage.getItem("token");
       const response = await axios.get(`${API}/api/downloads/${slug}`, {
         responseType: "blob",
         headers: { Authorization: `Bearer ${token}` },
@@ -165,7 +166,20 @@ function BookDetail() {
                 💡 서비스 설명
               </h3>
               <div className="text-sm text-gray-800 break-words">
-			  	{book.description}
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkBreaks]}
+                  rehypePlugins={[rehypeRaw]}
+                  components={{
+                    p: ({ node, ...props }) => (
+                      <p className="mb-2" {...props} />
+                    ),
+                    li: ({ node, ...props }) => (
+                      <li className="list-disc ml-5" {...props} />
+                    ),
+                  }}
+                >
+                  {book.serviceDetail || ""}
+                </ReactMarkdown>
               </div>
             </div>
 
@@ -224,8 +238,14 @@ function BookDetail() {
                 />
 
                 <p className="text-gray-700 text-sm">
-                  정가 <span className="line-through text-gray-400">{book.originalPrice?.toLocaleString()}원</span> →{' '}
-                  <span className="text-red-600 font-semibold">{book.price?.toLocaleString()}원</span>
+                  정가{" "}
+                  <span className="line-through text-gray-400">
+                    {book.originalPrice?.toLocaleString()}원
+                  </span>{" "}
+                  →{" "}
+                  <span className="text-red-600 font-semibold">
+                    {book.price?.toLocaleString()}원
+                  </span>
                 </p>
 
                 <a
