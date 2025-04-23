@@ -222,32 +222,33 @@ function BookDetail() {
             )}
           </div>
 
-          {book.titleIndex !== 0 && (
-            <aside className="hidden lg:block sticky top-24 self-start h-fit">
-              <div className="bg-yellow-100 border border-yellow-300 rounded-xl p-6 shadow space-y-3 w-full">
-                <h3 className="text-lg font-bold text-gray-800">
-                  🎁 얼리버드 혜택
-                </h3>
+          <aside className="hidden lg:block sticky top-24 self-start h-fit">
+            <div className="bg-yellow-100 border border-yellow-300 rounded-xl p-6 shadow space-y-3 w-full">
+              <h3 className="text-lg font-bold text-gray-800">
+                🎁 얼리버드 혜택
+              </h3>
 
-                <iframe
-                  src="https://pub-bb775a03143c476396cd5c6200cab293.r2.dev/timer.html"
-                  width="100%"
-                  height="40"
-                  className="border-none"
-                  title="얼리버드 타이머"
-                />
+              <iframe
+                src="https://pub-bb775a03143c476396cd5c6200cab293.r2.dev/timer.html"
+                width="100%"
+                height="40"
+                className="border-none"
+                title="얼리버드 타이머"
+              />
 
-                <p className="text-gray-700 text-sm">
-                  정가{" "}
-                  <span className="line-through text-gray-400">
-                    {book.originalPrice?.toLocaleString()}원
-                  </span>{" "}
-                  →{" "}
-                  <span className="text-red-600 font-semibold">
-                    {book.price?.toLocaleString()}원
-                  </span>
-                </p>
+              <p className="text-gray-700 text-sm">
+                정가{" "}
+                <span className="line-through text-gray-400">
+                  {book.originalPrice?.toLocaleString()}원
+                </span>{" "}
+                →{" "}
+                <span className="text-red-600 font-semibold">
+                  {book.price?.toLocaleString()}원
+                </span>
+              </p>
 
+              {/* ✅ titleIndex가 0이 아닐 때만 크몽 버튼 표시 */}
+              {book.titleIndex !== 0 && (
                 <a
                   href={book.kmongUrl || "https://kmong.com"}
                   target="_blank"
@@ -256,16 +257,16 @@ function BookDetail() {
                 >
                   크몽에서 구매하기
                 </a>
+              )}
 
-                <Link
-                  to={`/transfer-confirm?slug=${book.slug}`}
-                  className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center"
-                >
-                  홈페이지 구매
-                </Link>
-              </div>
-            </aside>
-          )}
+              <Link
+                to={`/transfer-confirm?slug=${book.slug}`}
+                className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center"
+              >
+                홈페이지 구매
+              </Link>
+            </div>
+          </aside>
         </>
       ) : (
         <p className="text-center mt-10">책 정보를 불러오는 중입니다...</p>
