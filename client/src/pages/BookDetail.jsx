@@ -24,16 +24,6 @@ function BookDetail() {
   const [notFound, setNotFound] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [activePreview, setActivePreview] = useState(null);
-  const [customDescription, setCustomDescription] = useState("");
-
-  useEffect(() => {
-    if (slug) {
-      axios
-        .get(`${API}/api/books/${slug}/description`)
-        .then((res) => setCustomDescription(res.data.description || ""))
-        .catch(() => setCustomDescription(""));
-    }
-  }, [slug]);
 
   useEffect(() => {
     setNotFound(false);
@@ -175,20 +165,7 @@ function BookDetail() {
                 💡 서비스 설명
               </h3>
               <div className="text-sm text-gray-800 break-words">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm, remarkBreaks]}
-                  rehypePlugins={[rehypeRaw]}
-                  components={{
-                    p: ({ node, ...props }) => (
-                      <p className="mb-2" {...props} />
-                    ),
-                    li: ({ node, ...props }) => (
-                      <li className="list-disc ml-5" {...props} />
-                    ),
-                  }}
-                >
-                  {customDescription}
-                </ReactMarkdown>
+			  	{book.description}
               </div>
             </div>
 
