@@ -112,14 +112,6 @@
       fbq("init", "1240795668047874");
       fbq("track", "PageView");
     </script>
-    <noscript
-      ><img
-        height="1"
-        width="1"
-        style="display: none"
-        src="https://www.facebook.com/tr?id=1240795668047874&ev=PageView&noscript=1"
-    /></noscript>
-    <!-- End Meta Pixel Code -->
   </head>
   <body>
     <!-- Google Tag Manager (noscript) -->
@@ -135,5 +127,14 @@
 
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <!-- Meta Pixel noscript fallback (required for tracking without JS) -->
+    <noscript>
+      <img
+        height="1"
+        width="1"
+        style="display: none"
+        src="https://www.facebook.com/tr?id=1240795668047874&ev=PageView&noscript=1"
+      />
+    </noscript>
   </body>
 </html>
