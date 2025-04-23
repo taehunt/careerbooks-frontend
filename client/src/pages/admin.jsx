@@ -608,8 +608,8 @@ export default function Admin() {
             </h2>
 
             <p className="text-sm text-gray-600">
-              전자책을 선택하고 회원 이메일을 입력한 후 발송하세요. ZIP 첨부와
-              함께 감사 인사 메시지가 전송됩니다.
+              전자책을 선택하고 회원 이메일을 입력한 후 발송하세요. ZIP 첨부
+              대신 다운로드 링크와 감사 메시지가 전송됩니다.
             </p>
 
             <div className="space-y-3">
