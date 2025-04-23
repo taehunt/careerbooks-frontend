@@ -247,7 +247,7 @@ function BookDetail() {
                 </span>
               </p>
 
-              {/* ✅ titleIndex가 0이 아닐 때만 크몽 버튼 표시 */}
+              {/* 유료 책인 경우만 크몽 버튼 표시 */}
               {book.titleIndex !== 0 && (
                 <a
                   href={book.kmongUrl || "https://kmong.com"}
@@ -259,12 +259,29 @@ function BookDetail() {
                 </a>
               )}
 
-              <Link
-                to={`/transfer-confirm?slug=${book.slug}`}
-                className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center"
-              >
-                홈페이지 구매
-              </Link>
+              {/* 무료일 땐 다운로드 버튼, 유료일 땐 홈페이지 구매 */}
+              {book.titleIndex === 0 ? (
+                <button
+                  onClick={() => {
+                    const a = document.createElement("a");
+                    a.href = `${API}/api/downloads/frontend00`;
+                    a.setAttribute("download", "frontend00.zip");
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                  }}
+                  className="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-center"
+                >
+                  무료 다운로드
+                </button>
+              ) : (
+                <Link
+                  to={`/transfer-confirm?slug=${book.slug}`}
+                  className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center"
+                >
+                  홈페이지 구매
+                </Link>
+              )}
             </div>
           </aside>
         </>
