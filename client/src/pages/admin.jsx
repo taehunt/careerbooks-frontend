@@ -603,14 +603,34 @@ export default function Admin() {
       {showEmailModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg w-full max-w-2xl space-y-4">
-            <h2 className="text-xl font-bold">📧 이메일 발송</h2>
+            <h2 className="text-xl font-bold">📧 이메일로 ZIP 파일 발송</h2>
+            <p className="text-sm text-gray-600">
+              전자책을 선택하고 회원 이메일을 입력한 후 발송하세요. ZIP 첨부와
+              함께 감사 인사 메시지가 전송됩니다.
+            </p>
+
+            <select
+              value={selectedBook?.slug || ""}
+              onChange={(e) => {
+                const selected = books.find((b) => b.slug === e.target.value);
+                setSelectedBook(selected);
+              }}
+              className="w-full border p-2 rounded"
+            >
+              <option value="">📘 전자책 선택</option>
+              {books.map((book) => (
+                <option key={book.slug} value={book.slug}>
+                  {book.titleIndex}. {book.title}
+                </option>
+              ))}
+            </select>
 
             <input
               type="text"
               value={searchQuery}
               onChange={handleSearch}
               placeholder="회원 ID 또는 닉네임 검색"
-              className="w-full border p-2 rounded"
+              className="w-full border p-2 rounded mt-2"
             />
 
             <div className="max-h-40 overflow-auto border p-2 rounded mt-2">
@@ -635,6 +655,7 @@ export default function Admin() {
                   <span className="w-32 text-sm">{user.userId}</span>
                   <input
                     type="email"
+                    placeholder="이메일 입력"
                     value={manualEmails[user._id] || ""}
                     onChange={(e) =>
                       setManualEmails({
@@ -656,10 +677,28 @@ export default function Admin() {
                 취소
               </button>
               <button
-                onClick={sendBulkEmail}
+                onClick={async () => {
+                  if (!selectedBook) return alert("전자책을 선택해주세요");
+                  const payload = selectedUsersForEmail.map((user) => ({
+                    userId: user._id,
+                    slug: selectedBook.slug,
+                    to: manualEmails[user._id],
+                  }));
+                  try {
+                    await axios.post(`${API}/api/email/send-bulk`, payload);
+                    alert("✅ 이메일이 발송되었습니다.");
+                    setShowEmailModal(false);
+                    setSelectedUsersForEmail([]);
+                    setManualEmails({});
+                    setSelectedBook(null);
+                  } catch (err) {
+                    console.error("이메일 발송 실패", err);
+                    alert("❌ 이메일 발송 실패");
+                  }
+                }}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded"
               >
-                이메일 발송
+                발송
               </button>
             </div>
           </div>
