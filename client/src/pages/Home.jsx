@@ -5,30 +5,30 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import MainSlider from "../components/MainSlider";
 
-axios.defaults.withCredentials = true; // ★ 추가된 부분
+axios.defaults.withCredentials = true;
 
 const API = import.meta.env.VITE_API_BASE_URL;
 const UPLOADS = import.meta.env.VITE_UPLOADS_URL;
 
 // 🔥 추가: 썸네일 전용 컴포넌트
 function BookThumbnail({ book }) {
-	const [thumbSrc, setThumbSrc] = useState(`${UPLOADS}/${book.slug}_preview01.png`);
-  
-	useEffect(() => {
-	  const img = new Image();
-	  img.src = `${UPLOADS}/${book.slug}_preview01.png`;
-	  img.onload = () => setThumbSrc(img.src); // png 존재하면 사용
-	  img.onerror = () => setThumbSrc(`${UPLOADS}/${book.slug}_preview01.gif`); // 없으면 gif로 fallback
-	}, [book.slug]);
-  
-	return (
-	  <img
-		src={thumbSrc}
-		alt={`${book.title} 미리보기`}
-		className="w-full h-48 object-cover rounded-md mb-4 transition duration-300 hover:brightness-105"
-	  />
-	);
-  }
+  const [thumbSrc, setThumbSrc] = useState(`${UPLOADS}/${book.slug}_preview01.png`);
+
+  useEffect(() => {
+    const img = new Image();
+    img.src = `${UPLOADS}/${book.slug}_preview01.png`;
+    img.onload = () => setThumbSrc(img.src); // png 존재하면 사용
+    img.onerror = () => setThumbSrc(`${UPLOADS}/${book.slug}_preview01.gif`); // 없으면 gif로 fallback
+  }, [book.slug]);
+
+  return (
+    <img
+      src={thumbSrc}
+      alt={`${book.title} 미리보기`}
+      className="w-full h-48 object-cover rounded-md mb-4 transition duration-300 hover:brightness-105"
+    />
+  );
+}
 
 function Home() {
   const [books, setBooks] = useState([]);
@@ -148,7 +148,7 @@ function Home() {
         </div>
       </div>
 
-      {/* ✅ 무료 전자책 섹션 (PC용) */}
+      {/* ✅ 무료 전자책 섹션 (PC/모바일용) */}
       <div className="hidden md:block bg-white border rounded-xl shadow p-6 text-center hover:shadow-lg transition">
         <p className="text-lg text-gray-700 mb-4">
           프론트엔드 개발 비전공자를 위한 입문서! 아래 버튼을 눌러 무료 전자책을 받아보세요.
@@ -169,7 +169,6 @@ function Home() {
         </button>
       </div>
 
-      {/* ✅ 무료 전자책 섹션 (모바일용) */}
       <div className="block md:hidden bg-white border rounded-xl shadow p-4 text-center hover:shadow-lg transition">
         <button
           onClick={() => {
