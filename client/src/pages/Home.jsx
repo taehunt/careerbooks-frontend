@@ -24,6 +24,7 @@ function BookThumbnail({ book }) {
   return (
     <img
       src={thumbSrc}
+	  loading="lazy"
       alt={`${book.title} 미리보기`}
       className="w-full h-48 object-cover rounded-md mb-4 transition duration-300 hover:brightness-105"
     />
