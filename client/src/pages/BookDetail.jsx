@@ -231,7 +231,7 @@ function BookDetail() {
               <iframe
                 src="https://pub-bb775a03143c476396cd5c6200cab293.r2.dev/timer.html"
                 width="100%"
-                height="40"
+                height="48"
                 className="border-none"
                 title="얼리버드 타이머"
               />
