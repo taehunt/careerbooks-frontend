@@ -12,13 +12,13 @@ const UPLOADS = import.meta.env.VITE_UPLOADS_URL;
 
 // 🔥 추가: 썸네일 전용 컴포넌트
 function BookThumbnail({ book }) {
-  const [thumbSrc, setThumbSrc] = useState(`${UPLOADS}/${book.slug}_preview01.png`);
+  const [thumbSrc, setThumbSrc] = useState(`${UPLOADS}/${book.slug}_sum.png`);
 
   useEffect(() => {
     const img = new Image();
-    img.src = `${UPLOADS}/${book.slug}_preview01.png`;
+    img.src = `${UPLOADS}/${book.slug}_sum.png`;
     img.onload = () => setThumbSrc(img.src); // png 존재하면 사용
-    img.onerror = () => setThumbSrc(`${UPLOADS}/${book.slug}_preview01.gif`); // 없으면 gif로 fallback
+    img.onerror = () => setThumbSrc(`${UPLOADS}/${book.slug}_sum.gif`); // 없으면 gif로 fallback
   }, [book.slug]);
 
   return (
