@@ -81,7 +81,7 @@ export default function BookList() {
           {books.map((book) => (
             <div
               key={book.slug}
-              className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 border border-gray-100"
+              className="p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 border border-gray-100"
             >
               <BookThumbnail book={book} /> {/* ✅ 썸네일 컴포넌트 사용 */}
 
