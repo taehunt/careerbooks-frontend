@@ -53,6 +53,18 @@ export default function TransferConfirm() {
       .catch(() => {});
   }, [slug]);
 
+  // 📌 제출 완료되었을 때 Purchase 이벤트 전송
+  useEffect(() => {
+    if (submitted && book) {
+      if (typeof fbq !== "undefined") {
+        fbq('track', 'Purchase', {
+          value: book.price || 0,
+          currency: 'KRW',
+        });
+      }
+    }
+  }, [submitted, book]);
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
